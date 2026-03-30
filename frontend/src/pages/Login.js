@@ -48,7 +48,7 @@ const Login = ({ setIsAuthenticated }) => {
     <div 
       className="min-h-screen flex items-center justify-center p-4"
       style={{
-        backgroundImage: 'url(https://images.pexels.com/photos/4328745/pexels-photo-4328745.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940)',
+        backgroundImage: 'url(https://customer-assets.emergentagent.com/job_piedade-sports/artifacts/k6ejao75_estadio.jpg)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}
