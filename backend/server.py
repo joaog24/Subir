@@ -76,6 +76,7 @@ class Atleta(BaseModel):
     nome: str
     posicao: str
     telefone: str
+    foto: Optional[str] = None
     ativo: bool = True
     criado_em: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -83,6 +84,7 @@ class AtletaCreate(BaseModel):
     nome: str
     posicao: str
     telefone: str
+    foto: Optional[str] = None
     ativo: bool = True
 
 class AtletaResponse(BaseModel):
@@ -90,6 +92,7 @@ class AtletaResponse(BaseModel):
     nome: str
     posicao: str
     telefone: str
+    foto: Optional[str]
     ativo: bool
 
 class Treino(BaseModel):

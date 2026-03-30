@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Card } from '../components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../components/ui/dropdown-menu';
 import { Badge } from '../components/ui/badge';
-import { Plus, MoreVertical, Pencil, Trash2, Search } from 'lucide-react';
+import { Plus, MoreVertical, Pencil, Trash2, Search, Upload, User } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import api from '../services/api';
 
@@ -22,8 +21,10 @@ const Atletas = () => {
     nome: '',
     posicao: '',
     telefone: '',
+    foto: null,
     ativo: true,
   });
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     loadAtletas();
@@ -44,6 +45,21 @@ const Atletas = () => {
       setFilteredAtletas(response.data);
     } catch (error) {
       toast.error('Erro ao carregar atletas');
+    }
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error('Imagem muito grande! Máximo 2MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({ ...formData, foto: reader.result });
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -71,6 +87,7 @@ const Atletas = () => {
       nome: atleta.nome,
       posicao: atleta.posicao,
       telefone: atleta.telefone,
+      foto: atleta.foto,
       ativo: atleta.ativo,
     });
     setOpen(true);
@@ -90,7 +107,31 @@ const Atletas = () => {
 
   const resetForm = () => {
     setEditingId(null);
-    setFormData({ nome: '', posicao: '', telefone: '', ativo: true });
+    setFormData({ nome: '', posicao: '', telefone: '', foto: null, ativo: true });
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const getInitials = (nome) => {
+    const parts = nome.split(' ');
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    }
+    return nome.substring(0, 2).toUpperCase();
+  };
+
+  const getAvatarColor = (nome) => {
+    const colors = [
+      'bg-blue-500',
+      'bg-green-500',
+      'bg-purple-500',
+      'bg-orange-500',
+      'bg-pink-500',
+      'bg-indigo-500',
+    ];
+    const index = nome.charCodeAt(0) % colors.length;
+    return colors[index];
   };
 
   return (
@@ -108,12 +149,45 @@ const Atletas = () => {
               Novo Atleta
             </Button>
           </DialogTrigger>
-          <DialogContent data-testid="atleta-dialog">
+          <DialogContent data-testid="atleta-dialog" className="max-w-lg">
             <DialogHeader>
               <DialogTitle>{editingId ? 'Editar Atleta' : 'Novo Atleta'}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4" aria-describedby="atleta-form-description">
               <p id="atleta-form-description" className="sr-only">Preencha os dados do atleta</p>
+              
+              {/* Foto */}
+              <div className="flex flex-col items-center gap-4">
+                <div className="relative">
+                  {formData.foto ? (
+                    <img
+                      src={formData.foto}
+                      alt="Preview"
+                      className="w-32 h-32 rounded-full object-cover border-4 border-[#002B8C]"
+                    />
+                  ) : (
+                    <div className={`w-32 h-32 rounded-full ${getAvatarColor(formData.nome || 'A')} flex items-center justify-center border-4 border-[#002B8C]`}>
+                      <User className="w-16 h-16 text-white" />
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="absolute bottom-0 right-0 bg-[#FFC107] hover:bg-[#FFD54F] text-[#0A1F51] p-2 rounded-full shadow-lg transition-all"
+                  >
+                    <Upload className="w-4 h-4" />
+                  </button>
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="hidden"
+                />
+                <p className="text-xs text-slate-500">Clique no ícone para adicionar foto (máx. 2MB)</p>
+              </div>
+
               <div>
                 <Label htmlFor="nome">Nome</Label>
                 <Input
@@ -181,61 +255,70 @@ const Atletas = () => {
         </div>
       </Card>
 
-      {/* Table */}
-      <Card className="shadow-sm">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nome</TableHead>
-              <TableHead>Posição</TableHead>
-              <TableHead>Telefone</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredAtletas.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center text-slate-500">
-                  Nenhum atleta encontrado
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredAtletas.map((atleta) => (
-                <TableRow key={atleta.id} data-testid={`atleta-row-${atleta.id}`}>
-                  <TableCell className="font-medium">{atleta.nome}</TableCell>
-                  <TableCell>{atleta.posicao}</TableCell>
-                  <TableCell>{atleta.telefone}</TableCell>
-                  <TableCell>
-                    <Badge variant={atleta.ativo ? 'default' : 'secondary'} className={atleta.ativo ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-800'}>
-                      {atleta.ativo ? 'Ativo' : 'Inativo'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" data-testid={`atleta-actions-${atleta.id}`}>
-                          <MoreVertical className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleEdit(atleta)} data-testid={`edit-atleta-${atleta.id}`}>
-                          <Pencil className="w-4 h-4 mr-2" />
-                          Editar
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDelete(atleta.id)} className="text-red-600" data-testid={`delete-atleta-${atleta.id}`}>
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          Excluir
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </Card>
+      {/* Athletes Grid */}
+      {filteredAtletas.length === 0 ? (
+        <Card className="p-12 text-center">
+          <User className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+          <p className="text-slate-500 text-lg">Nenhum atleta encontrado</p>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {filteredAtletas.map((atleta) => (
+            <Card key={atleta.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-200" data-testid={`atleta-card-${atleta.id}`}>
+              <div className="relative">
+                <div className="bg-gradient-to-br from-[#0A1F51] to-[#002B8C] h-24"></div>
+                <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2">
+                  {atleta.foto ? (
+                    <img
+                      src={atleta.foto}
+                      alt={atleta.nome}
+                      className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
+                    />
+                  ) : (
+                    <div className={`w-24 h-24 rounded-full ${getAvatarColor(atleta.nome)} flex items-center justify-center border-4 border-white shadow-lg`}>
+                      <span className="text-2xl font-bold text-white">{getInitials(atleta.nome)}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="pt-16 pb-6 px-6 text-center">
+                <h3 className="text-lg font-bold text-slate-900 mb-1">{atleta.nome}</h3>
+                <p className="text-sm text-[#FFC107] font-semibold mb-2">{atleta.posicao}</p>
+                <p className="text-sm text-slate-600 mb-3">{atleta.telefone}</p>
+                <div className="flex justify-center mb-4">
+                  <Badge 
+                    variant={atleta.ativo ? 'default' : 'secondary'} 
+                    className={atleta.ativo ? 'bg-[#28A745] text-white' : 'bg-slate-200 text-slate-800'}
+                  >
+                    {atleta.ativo ? 'Ativo' : 'Inativo'}
+                  </Badge>
+                </div>
+                <div className="flex gap-2 justify-center">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleEdit(atleta)}
+                    data-testid={`edit-atleta-${atleta.id}`}
+                    className="flex-1"
+                  >
+                    <Pencil className="w-3 h-3 mr-1" />
+                    Editar
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDelete(atleta.id)}
+                    data-testid={`delete-atleta-${atleta.id}`}
+                    className="text-red-600 hover:bg-red-50"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
