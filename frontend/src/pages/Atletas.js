@@ -116,17 +116,30 @@ const Atletas = () => {
 
   const FootIcon = ({ side, isActive }) => (
     <svg
-      width="24"
-      height="24"
+      width="28"
+      height="28"
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       style={{ transform: side === 'esquerdo' ? 'scaleX(-1)' : 'none' }}
+      className="transition-all duration-200"
     >
+      {/* Chuteira de futebol */}
       <path
-        d="M14 3C13.45 3 13 3.45 13 4C13 4.55 13.45 5 14 5C14.55 5 15 4.55 15 4C15 3.45 14.55 3 14 3ZM12 5C11.45 5 11 5.45 11 6C11 6.55 11.45 7 12 7C12.55 7 13 6.55 13 6C13 5.45 12.55 5 12 5ZM10 7C9.45 7 9 7.45 9 8C9 8.55 9.45 9 10 9C10.55 9 11 8.55 11 8C11 7.45 10.55 7 10 7ZM8.5 9C7.95 9 7.5 9.45 7.5 10C7.5 10.55 7.95 11 8.5 11C9.05 11 9.5 10.55 9.5 10C9.5 9.45 9.05 9 8.5 9ZM7.5 11.5C6.67 11.5 6 12.17 6 13C6 13.83 6.67 14.5 7.5 14.5C7.89 14.5 8.24 14.35 8.5 14.11L9.5 20C9.61 20.56 10.11 21 10.69 21H12.31C12.89 21 13.39 20.56 13.5 20L14.5 14.11C14.76 14.35 15.11 14.5 15.5 14.5C16.33 14.5 17 13.83 17 13C17 12.17 16.33 11.5 15.5 11.5C15.11 11.5 14.76 11.65 14.5 11.89L14 8C14 7.45 13.55 7 13 7H10C9.45 7 9 7.45 9 8L8.5 11.89C8.24 11.65 7.89 11.5 7.5 11.5Z"
-        fill={isActive ? '#FFC107' : '#64748B'}
-        opacity={isActive ? '1' : '0.3'}
+        d="M20.5 8.5C20.5 8.5 19 7 17 7C15.5 7 14.5 7.5 13.5 8.5L11 11H8C6.9 11 6 11.9 6 13V14C6 15.1 6.9 16 8 16H9L11 18C11.5 18.5 12.2 19 13 19H16C17.7 19 19 17.7 19 16V14.5L20.5 13C21.2 12.3 21.5 11.3 21.5 10.5C21.5 9.5 21 9 20.5 8.5Z"
+        fill={isActive ? '#FFC107' : '#CBD5E1'}
+        stroke={isActive ? '#F59E0B' : '#94A3B8'}
+        strokeWidth="1"
+      />
+      {/* Detalhes da chuteira */}
+      <circle cx="15" cy="13" r="0.8" fill={isActive ? '#F59E0B' : '#94A3B8'} />
+      <circle cx="13" cy="15" r="0.8" fill={isActive ? '#F59E0B' : '#94A3B8'} />
+      <circle cx="11" cy="13.5" r="0.8" fill={isActive ? '#F59E0B' : '#94A3B8'} />
+      <path
+        d="M17 15L18.5 13.5"
+        stroke={isActive ? '#F59E0B' : '#94A3B8'}
+        strokeWidth="1.5"
+        strokeLinecap="round"
       />
     </svg>
   );
