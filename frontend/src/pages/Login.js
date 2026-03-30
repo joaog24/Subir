@@ -50,7 +50,7 @@ const Login = ({ setIsAuthenticated }) => {
       style={{
         backgroundImage: 'url(https://customer-assets.emergentagent.com/job_piedade-sports/artifacts/k6ejao75_estadio.jpg)',
         backgroundSize: 'cover',
-        backgroundPosition: 'center',
+        backgroundPosition: 'bottom',
       }}
     >
       <div className="absolute inset-0 bg-[#0A1F51]/80"></div>
