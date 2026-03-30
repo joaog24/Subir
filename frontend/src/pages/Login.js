@@ -53,7 +53,7 @@ const Login = ({ setIsAuthenticated }) => {
         backgroundPosition: 'center',
       }}
     >
-      <div className="absolute inset-0 bg-[#0A1F51]/90"></div>
+      <div className="absolute inset-0 bg-[#0A1F51]/80"></div>
       
       <Card className="relative z-10 w-full max-w-md p-8 shadow-2xl" data-testid="login-card">
         <div className="text-center mb-8">
