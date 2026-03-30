@@ -270,6 +270,124 @@ const Financeiro = () => {
           <TabsTrigger value="receitas" data-testid="tab-receitas">Receitas</TabsTrigger>
         </TabsList>
 
+        {/* Receitas */}
+        <TabsContent value="receitas">
+          <Card className="p-4 mb-4">
+            <Dialog open={receitaOpen} onOpenChange={(val) => { setReceitaOpen(val); if (!val) resetReceitaForm(); }}>
+              <DialogTrigger asChild>
+                <Button className="bg-[#002B8C] hover:bg-[#0A1F51] text-white" data-testid="add-receita-button">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nova Receita
+                </Button>
+              </DialogTrigger>
+              <DialogContent data-testid="receita-dialog">
+                <DialogHeader>
+                  <DialogTitle>{editingReceitaId ? 'Editar Receita' : 'Nova Receita'}</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleReceitaSubmit} className="space-y-4">
+                  <div>
+                    <Label>Descrição</Label>
+                    <Input
+                      value={receitaForm.descricao}
+                      onChange={(e) => setReceitaForm({ ...receitaForm, descricao: e.target.value })}
+                      required
+                      className="mt-1.5"
+                      data-testid="receita-descricao-input"
+                    />
+                  </div>
+                  <div>
+                    <Label>Valor</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={receitaForm.valor}
+                      onChange={(e) => setReceitaForm({ ...receitaForm, valor: e.target.value })}
+                      required
+                      className="mt-1.5"
+                      data-testid="receita-valor-input"
+                    />
+                  </div>
+                  <div>
+                    <Label>Data</Label>
+                    <Input
+                      type="date"
+                      value={receitaForm.data}
+                      onChange={(e) => setReceitaForm({ ...receitaForm, data: e.target.value })}
+                      required
+                      className="mt-1.5"
+                      data-testid="receita-data-input"
+                    />
+                  </div>
+                  <div>
+                    <Label>Patrocinador (Opcional)</Label>
+                    <Select value={receitaForm.patrocinador_id || 'none'} onValueChange={(val) => setReceitaForm({ ...receitaForm, patrocinador_id: val === 'none' ? '' : val })}>
+                      <SelectTrigger className="mt-1.5" data-testid="receita-patrocinador-select">
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Nenhum</SelectItem>
+                        {patrocinadores.filter(p => p.ativo).map(p => (
+                          <SelectItem key={p.id} value={p.id}>{p.nome}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button type="submit" className="w-full bg-[#002B8C] hover:bg-[#0A1F51]" data-testid="receita-submit-button">
+                    {editingReceitaId ? 'Atualizar' : 'Registrar'}
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </Card>
+          <Card className="shadow-sm">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Data</TableHead>
+                  <TableHead>Descrição</TableHead>
+                  <TableHead>Patrocinador</TableHead>
+                  <TableHead className="text-right">Valor</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {recebimentos.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center text-slate-500">Nenhuma receita encontrada</TableCell>
+                  </TableRow>
+                ) : (
+                  recebimentos.map((rec) => (
+                    <TableRow key={rec.id}>
+                      <TableCell>{new Date(rec.data).toLocaleDateString('pt-BR')}</TableCell>
+                      <TableCell>{rec.descricao}</TableCell>
+                      <TableCell>{rec.patrocinador_nome || '-'}</TableCell>
+                      <TableCell className="text-right font-bold text-[#28A745]">R$ {rec.valor.toFixed(2)}</TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreVertical className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleEditReceita(rec)}>
+                              <Pencil className="w-4 h-4 mr-2" />
+                              Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDeleteReceita(rec.id)} className="text-red-600">
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Excluir
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </Card>
+        </TabsContent>
 
         {/* Despesas */}
         <TabsContent value="despesas">
@@ -503,130 +621,6 @@ const Financeiro = () => {
             </Table>
           </Card>
         </TabsContent>
-
-        {/* Receitas */}
-        <TabsContent value="receitas">
-          <Card className="p-4 mb-4">
-            <Dialog open={receitaOpen} onOpenChange={(val) => { setReceitaOpen(val); if (!val) resetReceitaForm(); }}>
-              <DialogTrigger asChild>
-                <Button className="bg-[#002B8C] hover:bg-[#0A1F51] text-white" data-testid="add-receita-button">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Nova Receita
-                </Button>
-              </DialogTrigger>
-              <DialogContent data-testid="receita-dialog">
-                <DialogHeader>
-                  <DialogTitle>{editingReceitaId ? 'Editar Receita' : 'Nova Receita'}</DialogTitle>
-                </DialogHeader>
-                <form onSubmit={handleReceitaSubmit} className="space-y-4">
-                  <div>
-                    <Label>Descrição</Label>
-                    <Input
-                      value={receitaForm.descricao}
-                      onChange={(e) => setReceitaForm({ ...receitaForm, descricao: e.target.value })}
-                      required
-                      className="mt-1.5"
-                      data-testid="receita-descricao-input"
-                    />
-                  </div>
-                  <div>
-                    <Label>Valor</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={receitaForm.valor}
-                      onChange={(e) => setReceitaForm({ ...receitaForm, valor: e.target.value })}
-                      required
-                      className="mt-1.5"
-                      data-testid="receita-valor-input"
-                    />
-                  </div>
-                  <div>
-                    <Label>Data</Label>
-                    <Input
-                      type="date"
-                      value={receitaForm.data}
-                      onChange={(e) => setReceitaForm({ ...receitaForm, data: e.target.value })}
-                      required
-                      className="mt-1.5"
-                      data-testid="receita-data-input"
-                    />
-                  </div>
-                  <div>
-                    <Label>Patrocinador (Opcional)</Label>
-                    <Select value={receitaForm.patrocinador_id || 'none'} onValueChange={(val) => setReceitaForm({ ...receitaForm, patrocinador_id: val === 'none' ? '' : val })}>
-                      <SelectTrigger className="mt-1.5" data-testid="receita-patrocinador-select">
-                        <SelectValue placeholder="Selecione" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Nenhum</SelectItem>
-                        {patrocinadores.filter(p => p.ativo).map(p => (
-                          <SelectItem key={p.id} value={p.id}>{p.nome}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button type="submit" className="w-full bg-[#002B8C] hover:bg-[#0A1F51]" data-testid="receita-submit-button">
-                    {editingReceitaId ? 'Atualizar' : 'Registrar'}
-                  </Button>
-                </form>
-              </DialogContent>
-            </Dialog>
-          </Card>
-          <Card className="shadow-sm">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Data</TableHead>
-                  <TableHead>Descrição</TableHead>
-                  <TableHead>Patrocinador</TableHead>
-                  <TableHead className="text-right">Valor</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {recebimentos.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center text-slate-500">Nenhuma receita encontrada</TableCell>
-                  </TableRow>
-                ) : (
-                  recebimentos.map((rec) => (
-                    <TableRow key={rec.id}>
-                      <TableCell>{new Date(rec.data).toLocaleDateString('pt-BR')}</TableCell>
-                      <TableCell>{rec.descricao}</TableCell>
-                      <TableCell>{rec.patrocinador_nome || '-'}</TableCell>
-                      <TableCell className="text-right font-bold text-[#28A745]">R$ {rec.valor.toFixed(2)}</TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreVertical className="w-4 h-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleEditReceita(rec)}>
-                              <Pencil className="w-4 h-4 mr-2" />
-                              Editar
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDeleteReceita(rec.id)} className="text-red-600">
-                              <Trash2 className="w-4 h-4 mr-2" />
-                              Excluir
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </Card>
-        </TabsContent>
-
-
-
-
-
       </Tabs>
     </div>
   );
