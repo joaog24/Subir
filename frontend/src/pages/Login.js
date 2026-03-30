@@ -50,10 +50,10 @@ const Login = ({ setIsAuthenticated }) => {
       style={{
         backgroundImage: 'url(https://customer-assets.emergentagent.com/job_piedade-sports/artifacts/k6ejao75_estadio.jpg)',
         backgroundSize: 'cover',
-        backgroundPosition: 'bottom',
+        backgroundPosition: 'center',
       }}
     >
-      <div className="absolute inset-0 bg-[#0A1F51]/80"></div>
+      <div className="absolute inset-0 bg-[#0A1F51]/90"></div>
       
       <Card className="relative z-10 w-full max-w-md p-8 shadow-2xl" data-testid="login-card">
         <div className="text-center mb-8">
