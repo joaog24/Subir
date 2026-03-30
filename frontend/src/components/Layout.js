@@ -35,11 +35,11 @@ const Layout = ({ children, setIsAuthenticated }) => {
     <div className="flex flex-col h-full">
       <div className="p-6 border-b border-white/10">
         <div className="flex items-center gap-3">
-          <div className="bg-white rounded-lg p-1.5 flex items-center justify-center flex-shrink-0">
+          <div className="bg-white rounded-lg p-2 flex items-center justify-center flex-shrink-0">
             <img 
               src="https://customer-assets.emergentagent.com/job_piedade-sports/artifacts/nuyr9yj4_logo.png" 
               alt="E.C.P Logo" 
-              className="w-8 h-8 object-contain"
+              className="w-10 h-10 object-contain"
             />
           </div>
           <div className="flex-1 min-w-0">
