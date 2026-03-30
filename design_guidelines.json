@@ -1,0 +1,114 @@
+{
+  "project_name": "Esporte Clube Piedade (E.C.P) Management Dashboard",
+  "theme": "light",
+  "archetype": "4 (Swiss & High-Contrast)",
+  "emotional_tone": "Professional, Organized, Athletic, Data-Driven",
+  "typography": {
+    "heading_font": "Barlow",
+    "body_font": "Manrope",
+    "hierarchy": {
+      "h1": "text-4xl sm:text-5xl lg:text-5xl font-bold tracking-tight text-slate-900",
+      "h2": "text-2xl sm:text-3xl font-semibold tracking-tight text-slate-800",
+      "h3": "text-xl sm:text-2xl font-semibold tracking-tight text-slate-800",
+      "h4": "text-lg font-medium text-slate-800",
+      "body": "text-base font-normal text-slate-600 leading-relaxed",
+      "small": "text-sm text-slate-500 font-medium",
+      "overline": "text-xs font-bold uppercase tracking-[0.2em] text-slate-500"
+    }
+  },
+  "colors": {
+    "primary": {
+      "DEFAULT": "#0A192F",
+      "foreground": "#FFFFFF",
+      "hover": "#112240",
+      "description": "Official Dark Blue of E.C.P, used for sidebar, headers, and primary buttons."
+    },
+    "secondary": {
+      "DEFAULT": "#FACC15",
+      "foreground": "#0A192F",
+      "hover": "#EAB308",
+      "description": "Official Yellow of E.C.P, used for kinetic triggers, warning states, and accents."
+    },
+    "background": {
+      "DEFAULT": "#F8FAFC",
+      "paper": "#FFFFFF",
+      "sidebar": "#0A192F"
+    },
+    "text": {
+      "primary": "#0F172A",
+      "secondary": "#475569",
+      "muted": "#94A3B8",
+      "on_dark": "#FFFFFF"
+    },
+    "status": {
+      "success": "#10B981",
+      "danger": "#EF4444",
+      "warning": "#F59E0B",
+      "info": "#3B82F6"
+    },
+    "border": "#E2E8F0"
+  },
+  "spacing_and_layout": {
+    "grid_system": "MODE B: THE CONTROL ROOM GRID (Dashboard)",
+    "container_padding": "p-6 md:p-8",
+    "card_padding": "p-6",
+    "gap": "gap-6",
+    "border_radius": {
+      "card": "rounded-xl",
+      "button": "rounded-lg",
+      "input": "rounded-md"
+    },
+    "shadows": {
+      "card": "shadow-sm hover:shadow-md transition-shadow duration-200",
+      "dropdown": "shadow-lg"
+    }
+  },
+  "surface_strategy": {
+    "dashboard_cards": "Flat solid background (#FFFFFF), 1px subtle border (border-slate-200), rounded-xl, shadow-sm.",
+    "sidebar": "Flat solid background (#0A192F), text-white/70, active items text-white with left yellow border.",
+    "header": "Solid background (#FFFFFF) with a hard bottom border (border-slate-200), sticky top z-50."
+  },
+  "components": {
+    "buttons": "Primary buttons: bg-[#0A192F] text-white hover:bg-[#112240]. Accent buttons: bg-[#FACC15] text-[#0A192F] hover:bg-[#EAB308] font-bold.",
+    "tables": "Shadcn UI tables. Clean borders, left-aligned data. Use right-alignment for financial values.",
+    "forms": "Shadcn inputs and selects. Label text-sm font-semibold text-slate-700. Input border-slate-300 focus:ring-2 focus:ring-[#0A192F].",
+    "charts": "Recharts. Use primary (#0A192F) and secondary (#FACC15) colors. Tooltips must be dark.",
+    "tabs": "Shadcn Tabs, h-auto override, transparent background with bottom border indicator for active state.",
+    "badges": "rounded-full px-2.5 py-0.5 text-xs font-semibold. Active Athlete: bg-emerald-100 text-emerald-800."
+  },
+  "motion_and_interactions": {
+    "hover_states": "Buttons translate-y-[-1px], cards elevate slightly (shadow-md).",
+    "transitions": "transition-all duration-200 ease-in-out",
+    "page_load": "Staggered fade-up for dashboard widgets."
+  },
+  "media": {
+    "icons_library": "@phosphor-icons/react",
+    "images": {
+      "login_background": {
+        "url": "https://images.pexels.com/photos/4328745/pexels-photo-4328745.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Spacious soccer stadium with green field, used for login screen background with a dark blue overlay."
+      },
+      "player_placeholder": {
+        "url": "https://images.pexels.com/photos/36213470/pexels-photo-36213470.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Dynamic scene of amateur soccer players, used for blank states or onboarding cards."
+      }
+    }
+  },
+  "accessibility": {
+    "contrast_ratio": "All text must pass WCAG AA (4.5:1). Dark blue on white and yellow on dark blue.",
+    "focus_states": "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0A192F]",
+    "testing": "All interactive elements must include 'data-testid' attribute (e.g., data-testid='login-submit-btn')"
+  },
+  "instructions_to_main_agent": [
+    "Build the dashboard using React, Tailwind CSS, and Shadcn UI.",
+    "Install and use 'lucide-react' (default) or '@phosphor-icons/react' for sport-themed iconography.",
+    "Create a responsive Sidebar layout. On mobile, use a hamburger menu that opens a Shadcn Sheet containing the sidebar.",
+    "Implement the Dashboard with KPIs (Cards) for Active Athletes, Completed Trainings, Matches, Income, Expenses, and Balance.",
+    "Integrate Recharts for: Income vs Expenses (Bar/Area), Trainings per month (Line), Match results (Pie).",
+    "Ensure the color palette accurately reflects E.C.P: Dark Blue (#0A192F) and Yellow (#FACC15).",
+    "Implement full CRUD logic for Athletes, Trainings, Matches, Sponsors, Income, and Expenses.",
+    "Ensure the data tables have pagination and action dropdowns (Edit/Delete).",
+    "Do not use transparent headers over scrollable content. Keep the Topbar solid white.",
+    "Use the 'Barlow' font for all headings to give it a structured, athletic feel, and 'Manrope' for body text."
+  ]
+}
