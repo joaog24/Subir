@@ -229,9 +229,9 @@ const Financeiro = () => {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm font-medium text-slate-500 uppercase tracking-wide">Receitas</p>
-              <p className="text-3xl font-bold text-emerald-600 mt-2">R$ {totalReceitas.toFixed(2)}</p>
+              <p className="text-3xl font-bold text-[#28A745] mt-2">R$ {totalReceitas.toFixed(2)}</p>
             </div>
-            <div className="bg-emerald-500 p-3 rounded-lg">
+            <div className="bg-[#28A745] p-3 rounded-lg">
               <TrendingUp className="w-6 h-6 text-white" />
             </div>
           </div>
@@ -240,9 +240,9 @@ const Financeiro = () => {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm font-medium text-slate-500 uppercase tracking-wide">Despesas</p>
-              <p className="text-3xl font-bold text-red-600 mt-2">R$ {totalDespesas.toFixed(2)}</p>
+              <p className="text-3xl font-bold text-[#DC3545] mt-2">R$ {totalDespesas.toFixed(2)}</p>
             </div>
-            <div className="bg-red-500 p-3 rounded-lg">
+            <div className="bg-[#DC3545] p-3 rounded-lg">
               <TrendingDown className="w-6 h-6 text-white" />
             </div>
           </div>
@@ -251,11 +251,11 @@ const Financeiro = () => {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm font-medium text-slate-500 uppercase tracking-wide">Saldo</p>
-              <p className={`text-3xl font-bold mt-2 ${saldo >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <p className={`text-3xl font-bold mt-2 ${saldo >= 0 ? 'text-[#28A745]' : 'text-[#DC3545]'}`}>
                 R$ {saldo.toFixed(2)}
               </p>
             </div>
-            <div className={`${saldo >= 0 ? 'bg-green-600' : 'bg-red-600'} p-3 rounded-lg`}>
+            <div className={`${saldo >= 0 ? 'bg-[#28A745]' : 'bg-[#DC3545]'} p-3 rounded-lg`}>
               <DollarSign className="w-6 h-6 text-white" />
             </div>
           </div>
@@ -275,7 +275,7 @@ const Financeiro = () => {
           <Card className="p-4 mb-4">
             <Dialog open={receitaOpen} onOpenChange={(val) => { setReceitaOpen(val); if (!val) resetReceitaForm(); }}>
               <DialogTrigger asChild>
-                <Button className="bg-[#0A192F] hover:bg-[#112240] text-white" data-testid="add-receita-button">
+                <Button className="bg-[#002B8C] hover:bg-[#0A1F51] text-white" data-testid="add-receita-button">
                   <Plus className="w-4 h-4 mr-2" />
                   Nova Receita
                 </Button>
@@ -332,7 +332,7 @@ const Financeiro = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  <Button type="submit" className="w-full bg-[#0A192F] hover:bg-[#112240]" data-testid="receita-submit-button">
+                  <Button type="submit" className="w-full bg-[#002B8C] hover:bg-[#0A1F51]" data-testid="receita-submit-button">
                     {editingReceitaId ? 'Atualizar' : 'Registrar'}
                   </Button>
                 </form>
@@ -361,7 +361,7 @@ const Financeiro = () => {
                       <TableCell>{new Date(rec.data).toLocaleDateString('pt-BR')}</TableCell>
                       <TableCell>{rec.descricao}</TableCell>
                       <TableCell>{rec.patrocinador_nome || '-'}</TableCell>
-                      <TableCell className="text-right font-bold text-emerald-600">R$ {rec.valor.toFixed(2)}</TableCell>
+                      <TableCell className="text-right font-bold text-[#28A745]">R$ {rec.valor.toFixed(2)}</TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -394,7 +394,7 @@ const Financeiro = () => {
           <Card className="p-4 mb-4">
             <Dialog open={despesaOpen} onOpenChange={(val) => { setDespesaOpen(val); if (!val) resetDespesaForm(); }}>
               <DialogTrigger asChild>
-                <Button className="bg-[#0A192F] hover:bg-[#112240] text-white" data-testid="add-despesa-button">
+                <Button className="bg-[#002B8C] hover:bg-[#0A1F51] text-white" data-testid="add-despesa-button">
                   <Plus className="w-4 h-4 mr-2" />
                   Nova Despesa
                 </Button>
@@ -447,7 +447,7 @@ const Financeiro = () => {
                       data-testid="despesa-data-input"
                     />
                   </div>
-                  <Button type="submit" className="w-full bg-[#0A192F] hover:bg-[#112240]" data-testid="despesa-submit-button">
+                  <Button type="submit" className="w-full bg-[#002B8C] hover:bg-[#0A1F51]" data-testid="despesa-submit-button">
                     {editingDespesaId ? 'Atualizar' : 'Registrar'}
                   </Button>
                 </form>
@@ -476,7 +476,7 @@ const Financeiro = () => {
                       <TableCell>{new Date(desp.data).toLocaleDateString('pt-BR')}</TableCell>
                       <TableCell>{desp.descricao}</TableCell>
                       <TableCell><Badge variant="secondary">{desp.categoria}</Badge></TableCell>
-                      <TableCell className="text-right font-bold text-red-600">R$ {desp.valor.toFixed(2)}</TableCell>
+                      <TableCell className="text-right font-bold text-[#DC3545]">R$ {desp.valor.toFixed(2)}</TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -509,7 +509,7 @@ const Financeiro = () => {
           <Card className="p-4 mb-4">
             <Dialog open={patrOpen} onOpenChange={(val) => { setPatrOpen(val); if (!val) resetPatrForm(); }}>
               <DialogTrigger asChild>
-                <Button className="bg-[#0A192F] hover:bg-[#112240] text-white" data-testid="add-patrocinador-button">
+                <Button className="bg-[#002B8C] hover:bg-[#0A1F51] text-white" data-testid="add-patrocinador-button">
                   <Plus className="w-4 h-4 mr-2" />
                   Novo Patrocinador
                 </Button>
@@ -561,7 +561,7 @@ const Financeiro = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  <Button type="submit" className="w-full bg-[#0A192F] hover:bg-[#112240]" data-testid="patrocinador-submit-button">
+                  <Button type="submit" className="w-full bg-[#002B8C] hover:bg-[#0A1F51]" data-testid="patrocinador-submit-button">
                     {editingPatrId ? 'Atualizar' : 'Cadastrar'}
                   </Button>
                 </form>

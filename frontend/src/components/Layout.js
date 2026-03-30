@@ -8,8 +8,7 @@ import {
   DollarSign, 
   FileText, 
   LogOut,
-  Menu,
-  X
+  Menu
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
@@ -35,10 +34,19 @@ const Layout = ({ children, setIsAuthenticated }) => {
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
       <div className="p-6 border-b border-white/10">
-        <h1 className="text-2xl font-bold text-white tracking-tight" data-testid="sidebar-logo">
-          E.C.P Manager
-        </h1>
-        <p className="text-[#FACC15] text-sm mt-1 font-medium">Esporte Clube Piedade</p>
+        <div className="flex items-center gap-3">
+          <img 
+            src="https://customer-assets.emergentagent.com/job_piedade-sports/artifacts/nuyr9yj4_logo.png" 
+            alt="E.C.P Logo" 
+            className="w-10 h-10 object-contain flex-shrink-0"
+          />
+          <div className="flex-1 min-w-0">
+            <h1 className="text-lg font-bold text-white tracking-tight leading-tight" data-testid="sidebar-logo">
+              Esporte Clube Piedade
+            </h1>
+            <p className="text-[#FFC107] text-[10px] mt-0.5 font-medium">Sistema de Gerenciamento</p>
+          </div>
+        </div>
       </div>
       <nav className="flex-1 p-4 space-y-2">
         {menuItems.map((item) => {
@@ -52,7 +60,7 @@ const Layout = ({ children, setIsAuthenticated }) => {
               onClick={() => setMobileMenuOpen(false)}
               className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                 isActive
-                  ? 'bg-[#112240] text-white border-l-4 border-[#FACC15]'
+                  ? 'bg-[#2C4078] text-white border-l-4 border-[#FFC107]'
                   : 'text-white/70 hover:text-white hover:bg-white/5'
               }`}
             >
@@ -76,9 +84,9 @@ const Layout = ({ children, setIsAuthenticated }) => {
   );
 
   return (
-    <div className="flex h-screen bg-[#F8FAFC]">
+    <div className="flex h-screen bg-[#F8F9FA]">
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex w-64 bg-[#0A192F] flex-col">
+      <aside className="hidden lg:flex w-64 bg-[#0A1F51] flex-col">
         <SidebarContent />
       </aside>
 
@@ -90,7 +98,7 @@ const Layout = ({ children, setIsAuthenticated }) => {
               <Menu className="w-5 h-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-64 p-0 bg-[#0A192F]">
+          <SheetContent side="left" className="w-64 p-0 bg-[#0A1F51]">
             <SidebarContent />
           </SheetContent>
         </Sheet>
@@ -108,7 +116,7 @@ const Layout = ({ children, setIsAuthenticated }) => {
             </div>
             <div className="flex items-center gap-3">
               <div className="text-right">
-                <p className="text-sm font-semibold text-slate-800">Diretoria E.C.P</p>
+                <p className="text-sm font-semibold text-slate-800">Olá, admin</p>
                 <p className="text-xs text-slate-500">Administrador</p>
               </div>
             </div>

@@ -85,9 +85,9 @@ const Partidas = () => {
 
   const getResultadoBadge = (resultado) => {
     const configs = {
-      'Vitória': { color: 'bg-green-100 text-green-800', variant: 'default' },
-      'Empate': { color: 'bg-yellow-100 text-yellow-800', variant: 'secondary' },
-      'Derrota': { color: 'bg-red-100 text-red-800', variant: 'destructive' },
+      'Vitória': { color: 'bg-[#28A745] text-white', variant: 'default' },
+      'Empate': { color: 'bg-[#FFC107] text-[#0A1F51]', variant: 'secondary' },
+      'Derrota': { color: 'bg-[#DC3545] text-white', variant: 'destructive' },
     };
     const config = configs[resultado] || configs['Empate'];
     return <Badge className={config.color}>{resultado}</Badge>;
@@ -103,7 +103,7 @@ const Partidas = () => {
         </div>
         <Dialog open={open} onOpenChange={(val) => { setOpen(val); if (!val) resetForm(); }}>
           <DialogTrigger asChild>
-            <Button className="bg-[#0A192F] hover:bg-[#112240] text-white" data-testid="add-partida-button">
+            <Button className="bg-[#002B8C] hover:bg-[#0A1F51] text-white" data-testid="add-partida-button">
               <Plus className="w-4 h-4 mr-2" />
               Nova Partida
             </Button>
@@ -176,7 +176,7 @@ const Partidas = () => {
                   />
                 </div>
               </div>
-              <Button type="submit" className="w-full bg-[#0A192F] hover:bg-[#112240]" data-testid="partida-submit-button">
+              <Button type="submit" className="w-full bg-[#002B8C] hover:bg-[#0A1F51]" data-testid="partida-submit-button">
                 {editingId ? 'Atualizar' : 'Registrar'}
               </Button>
             </form>

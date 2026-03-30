@@ -60,12 +60,12 @@ const Dashboard = () => {
   }
 
   const kpiCards = [
-    { label: 'Atletas Ativos', value: stats.total_atletas_ativos, icon: Users, color: 'bg-blue-500' },
-    { label: 'Treinos Realizados', value: stats.total_treinos, icon: Dumbbell, color: 'bg-green-500' },
-    { label: 'Partidas', value: stats.total_partidas, icon: Trophy, color: 'bg-purple-500' },
-    { label: 'Receitas', value: `R$ ${stats.total_receitas.toFixed(2)}`, icon: TrendingUp, color: 'bg-emerald-500' },
-    { label: 'Despesas', value: `R$ ${stats.total_despesas.toFixed(2)}`, icon: TrendingDown, color: 'bg-red-500' },
-    { label: 'Saldo', value: `R$ ${stats.saldo.toFixed(2)}`, icon: DollarSign, color: stats.saldo >= 0 ? 'bg-green-600' : 'bg-red-600' },
+    { label: 'Atletas Ativos', value: stats.total_atletas_ativos, icon: Users, color: 'bg-[#002B8C]' },
+    { label: 'Treinos Realizados', value: stats.total_treinos, icon: Dumbbell, color: 'bg-[#28A745]' },
+    { label: 'Partidas', value: stats.total_partidas, icon: Trophy, color: 'bg-[#0A1F51]' },
+    { label: 'Receitas', value: `R$ ${stats.total_receitas.toFixed(2)}`, icon: TrendingUp, color: 'bg-[#28A745]' },
+    { label: 'Despesas', value: `R$ ${stats.total_despesas.toFixed(2)}`, icon: TrendingDown, color: 'bg-[#DC3545]' },
+    { label: 'Saldo', value: `R$ ${stats.saldo.toFixed(2)}`, icon: DollarSign, color: stats.saldo >= 0 ? 'bg-[#28A745]' : 'bg-[#DC3545]' },
   ];
 
   const mesesNomes = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
@@ -82,9 +82,9 @@ const Dashboard = () => {
   }));
 
   const resultadosData = [
-    { name: 'Vitórias', value: charts.resultados.vitorias, color: '#10B981' },
-    { name: 'Empates', value: charts.resultados.empates, color: '#F59E0B' },
-    { name: 'Derrotas', value: charts.resultados.derrotas, color: '#EF4444' },
+    { name: 'Vitórias', value: charts.resultados.vitorias, color: '#28A745' },
+    { name: 'Empates', value: charts.resultados.empates, color: '#FFC107' },
+    { name: 'Derrotas', value: charts.resultados.derrotas, color: '#DC3545' },
   ];
 
   return (
@@ -155,8 +155,8 @@ const Dashboard = () => {
               <YAxis stroke="#64748B" />
               <Tooltip contentStyle={{ backgroundColor: '#0A192F', border: 'none', borderRadius: '8px', color: '#fff' }} />
               <Legend />
-              <Bar dataKey="Receitas" fill="#10B981" radius={[8, 8, 0, 0]} />
-              <Bar dataKey="Despesas" fill="#EF4444" radius={[8, 8, 0, 0]} />
+              <Bar dataKey="Receitas" fill="#28A745" radius={[8, 8, 0, 0]} />
+              <Bar dataKey="Despesas" fill="#DC3545" radius={[8, 8, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </Card>
@@ -171,7 +171,7 @@ const Dashboard = () => {
               <YAxis stroke="#64748B" />
               <Tooltip contentStyle={{ backgroundColor: '#0A192F', border: 'none', borderRadius: '8px', color: '#fff' }} />
               <Legend />
-              <Line type="monotone" dataKey="treinos" stroke="#0A192F" strokeWidth={3} dot={{ fill: '#FACC15', r: 5 }} />
+              <Line type="monotone" dataKey="treinos" stroke="#002B8C" strokeWidth={3} dot={{ fill: '#FFC107', r: 5 }} />
             </LineChart>
           </ResponsiveContainer>
         </Card>

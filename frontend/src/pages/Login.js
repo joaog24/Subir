@@ -53,14 +53,21 @@ const Login = ({ setIsAuthenticated }) => {
         backgroundPosition: 'center',
       }}
     >
-      <div className="absolute inset-0 bg-[#0A192F]/85"></div>
+      <div className="absolute inset-0 bg-[#0A1F51]/90"></div>
       
       <Card className="relative z-10 w-full max-w-md p-8 shadow-2xl" data-testid="login-card">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-[#0A192F] mb-2" data-testid="login-title">
-            E.C.P Manager
+          <div className="flex justify-center mb-4">
+            <img 
+              src="https://customer-assets.emergentagent.com/job_piedade-sports/artifacts/nuyr9yj4_logo.png" 
+              alt="E.C.P Logo" 
+              className="w-24 h-24 object-contain"
+            />
+          </div>
+          <h1 className="text-3xl font-bold text-[#0A1F51] mb-2" data-testid="login-title">
+            Esporte Clube Piedade
           </h1>
-          <p className="text-[#FACC15] font-semibold text-lg">Esporte Clube Piedade</p>
+          <p className="text-[#FFC107] font-bold text-lg">Sistema de Gerenciamento</p>
           <p className="text-slate-600 mt-2">
             {isLogin ? 'Entre para gerenciar o clube' : 'Crie sua conta'}
           </p>
@@ -79,7 +86,7 @@ const Login = ({ setIsAuthenticated }) => {
                 value={formData.nome}
                 onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
                 required
-                className="mt-1.5 border-slate-300 focus:ring-2 focus:ring-[#0A192F]"
+                className="mt-1.5 border-slate-300 focus:ring-2 focus:ring-[#0A1F51]"
               />
             </div>
           )}
@@ -95,7 +102,7 @@ const Login = ({ setIsAuthenticated }) => {
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               required
-              className="mt-1.5 border-slate-300 focus:ring-2 focus:ring-[#0A192F]"
+              className="mt-1.5 border-slate-300 focus:ring-2 focus:ring-[#0A1F51]"
             />
           </div>
 
@@ -110,7 +117,7 @@ const Login = ({ setIsAuthenticated }) => {
               value={formData.senha}
               onChange={(e) => setFormData({ ...formData, senha: e.target.value })}
               required
-              className="mt-1.5 border-slate-300 focus:ring-2 focus:ring-[#0A192F]"
+              className="mt-1.5 border-slate-300 focus:ring-2 focus:ring-[#0A1F51]"
             />
           </div>
 
@@ -118,7 +125,7 @@ const Login = ({ setIsAuthenticated }) => {
             type="submit"
             data-testid="login-submit-button"
             disabled={loading}
-            className="w-full bg-[#0A192F] hover:bg-[#112240] text-white font-bold py-3 rounded-lg transition-all duration-200 hover:translate-y-[-1px]"
+            className="w-full bg-[#002B8C] hover:bg-[#0A1F51] text-white font-bold py-3 rounded-lg transition-all duration-200 hover:translate-y-[-1px]"
           >
             {loading ? 'Processando...' : isLogin ? 'Entrar' : 'Criar Conta'}
           </Button>
@@ -129,7 +136,7 @@ const Login = ({ setIsAuthenticated }) => {
             type="button"
             data-testid="toggle-auth-mode"
             onClick={() => setIsLogin(!isLogin)}
-            className="text-sm text-slate-600 hover:text-[#0A192F] font-medium"
+            className="text-sm text-slate-600 hover:text-[#0A1F51] font-medium"
           >
             {isLogin ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Faça login'}
           </button>

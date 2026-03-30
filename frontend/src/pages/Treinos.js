@@ -138,7 +138,7 @@ const Treinos = () => {
         </div>
         <Dialog open={open} onOpenChange={(val) => { setOpen(val); if (!val) resetForm(); }}>
           <DialogTrigger asChild>
-            <Button className="bg-[#0A192F] hover:bg-[#112240] text-white" data-testid="add-treino-button">
+            <Button className="bg-[#002B8C] hover:bg-[#0A1F51] text-white" data-testid="add-treino-button">
               <Plus className="w-4 h-4 mr-2" />
               Novo Treino
             </Button>
@@ -182,7 +182,7 @@ const Treinos = () => {
                   className="mt-1.5"
                 />
               </div>
-              <Button type="submit" className="w-full bg-[#0A192F] hover:bg-[#112240]" data-testid="treino-submit-button">
+              <Button type="submit" className="w-full bg-[#002B8C] hover:bg-[#0A1F51]" data-testid="treino-submit-button">
                 {editingId ? 'Atualizar' : 'Criar'}
               </Button>
             </form>
@@ -270,7 +270,7 @@ const Treinos = () => {
               </div>
             ))}
           </div>
-          <Button onClick={savePresencas} className="w-full bg-[#0A192F] hover:bg-[#112240]" data-testid="save-presencas-button">
+          <Button onClick={savePresencas} className="w-full bg-[#002B8C] hover:bg-[#0A1F51]" data-testid="save-presencas-button">
             Salvar Presenças
           </Button>
         </DialogContent>

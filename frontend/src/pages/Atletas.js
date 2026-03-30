@@ -103,7 +103,7 @@ const Atletas = () => {
         </div>
         <Dialog open={open} onOpenChange={(val) => { setOpen(val); if (!val) resetForm(); }}>
           <DialogTrigger asChild>
-            <Button className="bg-[#0A192F] hover:bg-[#112240] text-white" data-testid="add-atleta-button">
+            <Button className="bg-[#002B8C] hover:bg-[#0A1F51] text-white" data-testid="add-atleta-button">
               <Plus className="w-4 h-4 mr-2" />
               Novo Atleta
             </Button>
@@ -159,7 +159,7 @@ const Atletas = () => {
                   </SelectContent>
                 </Select>
               </div>
-              <Button type="submit" className="w-full bg-[#0A192F] hover:bg-[#112240]" data-testid="atleta-submit-button">
+              <Button type="submit" className="w-full bg-[#002B8C] hover:bg-[#0A1F51]" data-testid="atleta-submit-button">
                 {editingId ? 'Atualizar' : 'Criar'}
               </Button>
             </form>
