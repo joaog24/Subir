@@ -5,9 +5,8 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Card } from '../components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../components/ui/dropdown-menu';
 import { Badge } from '../components/ui/badge';
-import { Plus, MoreVertical, Pencil, Trash2, Search, Upload, User } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, Upload, UserCircle2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import api from '../services/api';
 
@@ -22,6 +21,7 @@ const Atletas = () => {
     posicao: '',
     telefone: '',
     foto: null,
+    pe_dominante: 'direito',
     ativo: true,
   });
   const fileInputRef = useRef(null);
@@ -88,6 +88,7 @@ const Atletas = () => {
       posicao: atleta.posicao,
       telefone: atleta.telefone,
       foto: atleta.foto,
+      pe_dominante: atleta.pe_dominante || 'direito',
       ativo: atleta.ativo,
     });
     setOpen(true);
@@ -107,32 +108,28 @@ const Atletas = () => {
 
   const resetForm = () => {
     setEditingId(null);
-    setFormData({ nome: '', posicao: '', telefone: '', foto: null, ativo: true });
+    setFormData({ nome: '', posicao: '', telefone: '', foto: null, pe_dominante: 'direito', ativo: true });
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   };
 
-  const getInitials = (nome) => {
-    const parts = nome.split(' ');
-    if (parts.length >= 2) {
-      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
-    }
-    return nome.substring(0, 2).toUpperCase();
-  };
-
-  const getAvatarColor = (nome) => {
-    const colors = [
-      'bg-blue-500',
-      'bg-green-500',
-      'bg-purple-500',
-      'bg-orange-500',
-      'bg-pink-500',
-      'bg-indigo-500',
-    ];
-    const index = nome.charCodeAt(0) % colors.length;
-    return colors[index];
-  };
+  const FootIcon = ({ side, isActive }) => (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ transform: side === 'esquerdo' ? 'scaleX(-1)' : 'none' }}
+    >
+      <path
+        d="M14 3C13.45 3 13 3.45 13 4C13 4.55 13.45 5 14 5C14.55 5 15 4.55 15 4C15 3.45 14.55 3 14 3ZM12 5C11.45 5 11 5.45 11 6C11 6.55 11.45 7 12 7C12.55 7 13 6.55 13 6C13 5.45 12.55 5 12 5ZM10 7C9.45 7 9 7.45 9 8C9 8.55 9.45 9 10 9C10.55 9 11 8.55 11 8C11 7.45 10.55 7 10 7ZM8.5 9C7.95 9 7.5 9.45 7.5 10C7.5 10.55 7.95 11 8.5 11C9.05 11 9.5 10.55 9.5 10C9.5 9.45 9.05 9 8.5 9ZM7.5 11.5C6.67 11.5 6 12.17 6 13C6 13.83 6.67 14.5 7.5 14.5C7.89 14.5 8.24 14.35 8.5 14.11L9.5 20C9.61 20.56 10.11 21 10.69 21H12.31C12.89 21 13.39 20.56 13.5 20L14.5 14.11C14.76 14.35 15.11 14.5 15.5 14.5C16.33 14.5 17 13.83 17 13C17 12.17 16.33 11.5 15.5 11.5C15.11 11.5 14.76 11.65 14.5 11.89L14 8C14 7.45 13.55 7 13 7H10C9.45 7 9 7.45 9 8L8.5 11.89C8.24 11.65 7.89 11.5 7.5 11.5Z"
+        fill={isActive ? '#FFC107' : '#64748B'}
+        opacity={isActive ? '1' : '0.3'}
+      />
+    </svg>
+  );
 
   return (
     <div className="space-y-6 fade-up" data-testid="atletas-page">
@@ -166,8 +163,8 @@ const Atletas = () => {
                       className="w-32 h-32 rounded-full object-cover border-4 border-[#002B8C]"
                     />
                   ) : (
-                    <div className={`w-32 h-32 rounded-full ${getAvatarColor(formData.nome || 'A')} flex items-center justify-center border-4 border-[#002B8C]`}>
-                      <User className="w-16 h-16 text-white" />
+                    <div className="w-32 h-32 rounded-full bg-slate-200 flex items-center justify-center border-4 border-[#002B8C]">
+                      <UserCircle2 className="w-24 h-24 text-slate-400" />
                     </div>
                   )}
                   <button
@@ -222,6 +219,19 @@ const Atletas = () => {
                 />
               </div>
               <div>
+                <Label htmlFor="pe_dominante">Pé Dominante</Label>
+                <Select value={formData.pe_dominante} onValueChange={(val) => setFormData({ ...formData, pe_dominante: val })}>
+                  <SelectTrigger className="mt-1.5" data-testid="atleta-pe-select">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="direito">Direito</SelectItem>
+                    <SelectItem value="esquerdo">Esquerdo</SelectItem>
+                    <SelectItem value="ambidestro">Ambidestro</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
                 <Label htmlFor="ativo">Status</Label>
                 <Select value={formData.ativo.toString()} onValueChange={(val) => setFormData({ ...formData, ativo: val === 'true' })}>
                   <SelectTrigger className="mt-1.5" data-testid="atleta-ativo-select">
@@ -258,7 +268,7 @@ const Atletas = () => {
       {/* Athletes Grid */}
       {filteredAtletas.length === 0 ? (
         <Card className="p-12 text-center">
-          <User className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+          <UserCircle2 className="w-16 h-16 text-slate-300 mx-auto mb-4" />
           <p className="text-slate-500 text-lg">Nenhum atleta encontrado</p>
         </Card>
       ) : (
@@ -275,8 +285,8 @@ const Atletas = () => {
                       className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
                     />
                   ) : (
-                    <div className={`w-24 h-24 rounded-full ${getAvatarColor(atleta.nome)} flex items-center justify-center border-4 border-white shadow-lg`}>
-                      <span className="text-2xl font-bold text-white">{getInitials(atleta.nome)}</span>
+                    <div className="w-24 h-24 rounded-full bg-slate-200 flex items-center justify-center border-4 border-white shadow-lg">
+                      <UserCircle2 className="w-20 h-20 text-slate-400" />
                     </div>
                   )}
                 </div>
@@ -285,6 +295,31 @@ const Atletas = () => {
                 <h3 className="text-lg font-bold text-slate-900 mb-1">{atleta.nome}</h3>
                 <p className="text-sm text-[#FFC107] font-semibold mb-2">{atleta.posicao}</p>
                 <p className="text-sm text-slate-600 mb-3">{atleta.telefone}</p>
+                
+                {/* Pé Dominante */}
+                {atleta.pe_dominante && (
+                  <div className="flex justify-center gap-3 mb-3">
+                    <div className="flex flex-col items-center">
+                      <FootIcon 
+                        side="esquerdo" 
+                        isActive={atleta.pe_dominante === 'esquerdo' || atleta.pe_dominante === 'ambidestro'} 
+                      />
+                      <span className={`text-xs mt-1 ${(atleta.pe_dominante === 'esquerdo' || atleta.pe_dominante === 'ambidestro') ? 'text-[#FFC107] font-semibold' : 'text-slate-400'}`}>
+                        ESQ
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <FootIcon 
+                        side="direito" 
+                        isActive={atleta.pe_dominante === 'direito' || atleta.pe_dominante === 'ambidestro'} 
+                      />
+                      <span className={`text-xs mt-1 ${(atleta.pe_dominante === 'direito' || atleta.pe_dominante === 'ambidestro') ? 'text-[#FFC107] font-semibold' : 'text-slate-400'}`}>
+                        DIR
+                      </span>
+                    </div>
+                  </div>
+                )}
+                
                 <div className="flex justify-center mb-4">
                   <Badge 
                     variant={atleta.ativo ? 'default' : 'secondary'} 
