@@ -1,0 +1,629 @@
+import React, { useState, useEffect } from 'react';
+import { toast } from 'sonner';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { Card } from '../components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../components/ui/dropdown-menu';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { Badge } from '../components/ui/badge';
+import { Plus, MoreVertical, Pencil, Trash2, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
+import api from '../services/api';
+
+const Financeiro = () => {
+  const [recebimentos, setRecebimentos] = useState([]);
+  const [despesas, setDespesas] = useState([]);
+  const [patrocinadores, setPatrocinadores] = useState([]);
+  const [receitaOpen, setReceitaOpen] = useState(false);
+  const [despesaOpen, setDespesaOpen] = useState(false);
+  const [patrOpen, setPatrOpen] = useState(false);
+  const [editingReceitaId, setEditingReceitaId] = useState(null);
+  const [editingDespesaId, setEditingDespesaId] = useState(null);
+  const [editingPatrId, setEditingPatrId] = useState(null);
+
+  const [receitaForm, setReceitaForm] = useState({
+    descricao: '',
+    valor: '',
+    data: '',
+    patrocinador_id: '',
+  });
+
+  const [despesaForm, setDespesaForm] = useState({
+    descricao: '',
+    categoria: '',
+    valor: '',
+    data: '',
+  });
+
+  const [patrForm, setPatrForm] = useState({
+    nome: '',
+    tipo: '',
+    contato: '',
+    ativo: true,
+  });
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      const [recRes, despRes, patrRes] = await Promise.all([
+        api.get('/recebimentos'),
+        api.get('/despesas'),
+        api.get('/patrocinadores'),
+      ]);
+      setRecebimentos(recRes.data);
+      setDespesas(despRes.data);
+      setPatrocinadores(patrRes.data);
+    } catch (error) {
+      toast.error('Erro ao carregar dados financeiros');
+    }
+  };
+
+  // Receitas
+  const handleReceitaSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const data = {
+        ...receitaForm,
+        valor: parseFloat(receitaForm.valor),
+        patrocinador_id: receitaForm.patrocinador_id || null,
+      };
+      if (editingReceitaId) {
+        await api.put(`/recebimentos/${editingReceitaId}`, data);
+        toast.success('Receita atualizada!');
+      } else {
+        await api.post('/recebimentos', data);
+        toast.success('Receita registrada!');
+      }
+      setReceitaOpen(false);
+      resetReceitaForm();
+      loadData();
+    } catch (error) {
+      toast.error('Erro ao salvar receita');
+    }
+  };
+
+  const handleEditReceita = (rec) => {
+    setEditingReceitaId(rec.id);
+    setReceitaForm({
+      descricao: rec.descricao,
+      valor: rec.valor.toString(),
+      data: rec.data,
+      patrocinador_id: rec.patrocinador_id || '',
+    });
+    setReceitaOpen(true);
+  };
+
+  const handleDeleteReceita = async (id) => {
+    if (window.confirm('Excluir esta receita?')) {
+      try {
+        await api.delete(`/recebimentos/${id}`);
+        toast.success('Receita excluída!');
+        loadData();
+      } catch (error) {
+        toast.error('Erro ao excluir receita');
+      }
+    }
+  };
+
+  const resetReceitaForm = () => {
+    setEditingReceitaId(null);
+    setReceitaForm({ descricao: '', valor: '', data: '', patrocinador_id: '' });
+  };
+
+  // Despesas
+  const handleDespesaSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const data = { ...despesaForm, valor: parseFloat(despesaForm.valor) };
+      if (editingDespesaId) {
+        await api.put(`/despesas/${editingDespesaId}`, data);
+        toast.success('Despesa atualizada!');
+      } else {
+        await api.post('/despesas', data);
+        toast.success('Despesa registrada!');
+      }
+      setDespesaOpen(false);
+      resetDespesaForm();
+      loadData();
+    } catch (error) {
+      toast.error('Erro ao salvar despesa');
+    }
+  };
+
+  const handleEditDespesa = (desp) => {
+    setEditingDespesaId(desp.id);
+    setDespesaForm({
+      descricao: desp.descricao,
+      categoria: desp.categoria,
+      valor: desp.valor.toString(),
+      data: desp.data,
+    });
+    setDespesaOpen(true);
+  };
+
+  const handleDeleteDespesa = async (id) => {
+    if (window.confirm('Excluir esta despesa?')) {
+      try {
+        await api.delete(`/despesas/${id}`);
+        toast.success('Despesa excluída!');
+        loadData();
+      } catch (error) {
+        toast.error('Erro ao excluir despesa');
+      }
+    }
+  };
+
+  const resetDespesaForm = () => {
+    setEditingDespesaId(null);
+    setDespesaForm({ descricao: '', categoria: '', valor: '', data: '' });
+  };
+
+  // Patrocinadores
+  const handlePatrSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingPatrId) {
+        await api.put(`/patrocinadores/${editingPatrId}`, patrForm);
+        toast.success('Patrocinador atualizado!');
+      } else {
+        await api.post('/patrocinadores', patrForm);
+        toast.success('Patrocinador cadastrado!');
+      }
+      setPatrOpen(false);
+      resetPatrForm();
+      loadData();
+    } catch (error) {
+      toast.error('Erro ao salvar patrocinador');
+    }
+  };
+
+  const handleEditPatr = (patr) => {
+    setEditingPatrId(patr.id);
+    setPatrForm({
+      nome: patr.nome,
+      tipo: patr.tipo,
+      contato: patr.contato,
+      ativo: patr.ativo,
+    });
+    setPatrOpen(true);
+  };
+
+  const handleDeletePatr = async (id) => {
+    if (window.confirm('Excluir este patrocinador?')) {
+      try {
+        await api.delete(`/patrocinadores/${id}`);
+        toast.success('Patrocinador excluído!');
+        loadData();
+      } catch (error) {
+        toast.error('Erro ao excluir patrocinador');
+      }
+    }
+  };
+
+  const resetPatrForm = () => {
+    setEditingPatrId(null);
+    setPatrForm({ nome: '', tipo: '', contato: '', ativo: true });
+  };
+
+  const totalReceitas = recebimentos.reduce((sum, r) => sum + r.valor, 0);
+  const totalDespesas = despesas.reduce((sum, d) => sum + d.valor, 0);
+  const saldo = totalReceitas - totalDespesas;
+
+  return (
+    <div className="space-y-6 fade-up" data-testid="financeiro-page">
+      {/* Header */}
+      <div>
+        <h1 className="text-4xl font-bold text-slate-900 tracking-tight">Financeiro</h1>
+        <p className="text-slate-600 mt-1">Gerencie receitas, despesas e patrocinadores</p>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <Card className="p-6 shadow-sm">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-500 uppercase tracking-wide">Receitas</p>
+              <p className="text-3xl font-bold text-emerald-600 mt-2">R$ {totalReceitas.toFixed(2)}</p>
+            </div>
+            <div className="bg-emerald-500 p-3 rounded-lg">
+              <TrendingUp className="w-6 h-6 text-white" />
+            </div>
+          </div>
+        </Card>
+        <Card className="p-6 shadow-sm">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-500 uppercase tracking-wide">Despesas</p>
+              <p className="text-3xl font-bold text-red-600 mt-2">R$ {totalDespesas.toFixed(2)}</p>
+            </div>
+            <div className="bg-red-500 p-3 rounded-lg">
+              <TrendingDown className="w-6 h-6 text-white" />
+            </div>
+          </div>
+        </Card>
+        <Card className="p-6 shadow-sm">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-500 uppercase tracking-wide">Saldo</p>
+              <p className={`text-3xl font-bold mt-2 ${saldo >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                R$ {saldo.toFixed(2)}
+              </p>
+            </div>
+            <div className={`${saldo >= 0 ? 'bg-green-600' : 'bg-red-600'} p-3 rounded-lg`}>
+              <DollarSign className="w-6 h-6 text-white" />
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Tabs */}
+      <Tabs defaultValue="receitas" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="receitas" data-testid="tab-receitas">Receitas</TabsTrigger>
+          <TabsTrigger value="despesas" data-testid="tab-despesas">Despesas</TabsTrigger>
+          <TabsTrigger value="patrocinadores" data-testid="tab-patrocinadores">Patrocinadores</TabsTrigger>
+        </TabsList>
+
+        {/* Receitas */}
+        <TabsContent value="receitas">
+          <Card className="p-4 mb-4">
+            <Dialog open={receitaOpen} onOpenChange={(val) => { setReceitaOpen(val); if (!val) resetReceitaForm(); }}>
+              <DialogTrigger asChild>
+                <Button className="bg-[#0A192F] hover:bg-[#112240] text-white" data-testid="add-receita-button">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nova Receita
+                </Button>
+              </DialogTrigger>
+              <DialogContent data-testid="receita-dialog">
+                <DialogHeader>
+                  <DialogTitle>{editingReceitaId ? 'Editar Receita' : 'Nova Receita'}</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleReceitaSubmit} className="space-y-4">
+                  <div>
+                    <Label>Descrição</Label>
+                    <Input
+                      value={receitaForm.descricao}
+                      onChange={(e) => setReceitaForm({ ...receitaForm, descricao: e.target.value })}
+                      required
+                      className="mt-1.5"
+                      data-testid="receita-descricao-input"
+                    />
+                  </div>
+                  <div>
+                    <Label>Valor</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={receitaForm.valor}
+                      onChange={(e) => setReceitaForm({ ...receitaForm, valor: e.target.value })}
+                      required
+                      className="mt-1.5"
+                      data-testid="receita-valor-input"
+                    />
+                  </div>
+                  <div>
+                    <Label>Data</Label>
+                    <Input
+                      type="date"
+                      value={receitaForm.data}
+                      onChange={(e) => setReceitaForm({ ...receitaForm, data: e.target.value })}
+                      required
+                      className="mt-1.5"
+                      data-testid="receita-data-input"
+                    />
+                  </div>
+                  <div>
+                    <Label>Patrocinador (Opcional)</Label>
+                    <Select value={receitaForm.patrocinador_id || 'none'} onValueChange={(val) => setReceitaForm({ ...receitaForm, patrocinador_id: val === 'none' ? '' : val })}>
+                      <SelectTrigger className="mt-1.5" data-testid="receita-patrocinador-select">
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Nenhum</SelectItem>
+                        {patrocinadores.filter(p => p.ativo).map(p => (
+                          <SelectItem key={p.id} value={p.id}>{p.nome}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button type="submit" className="w-full bg-[#0A192F] hover:bg-[#112240]" data-testid="receita-submit-button">
+                    {editingReceitaId ? 'Atualizar' : 'Registrar'}
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </Card>
+          <Card className="shadow-sm">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Data</TableHead>
+                  <TableHead>Descrição</TableHead>
+                  <TableHead>Patrocinador</TableHead>
+                  <TableHead className="text-right">Valor</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {recebimentos.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center text-slate-500">Nenhuma receita encontrada</TableCell>
+                  </TableRow>
+                ) : (
+                  recebimentos.map((rec) => (
+                    <TableRow key={rec.id}>
+                      <TableCell>{new Date(rec.data).toLocaleDateString('pt-BR')}</TableCell>
+                      <TableCell>{rec.descricao}</TableCell>
+                      <TableCell>{rec.patrocinador_nome || '-'}</TableCell>
+                      <TableCell className="text-right font-bold text-emerald-600">R$ {rec.valor.toFixed(2)}</TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreVertical className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleEditReceita(rec)}>
+                              <Pencil className="w-4 h-4 mr-2" />
+                              Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDeleteReceita(rec.id)} className="text-red-600">
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Excluir
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </Card>
+        </TabsContent>
+
+        {/* Despesas */}
+        <TabsContent value="despesas">
+          <Card className="p-4 mb-4">
+            <Dialog open={despesaOpen} onOpenChange={(val) => { setDespesaOpen(val); if (!val) resetDespesaForm(); }}>
+              <DialogTrigger asChild>
+                <Button className="bg-[#0A192F] hover:bg-[#112240] text-white" data-testid="add-despesa-button">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nova Despesa
+                </Button>
+              </DialogTrigger>
+              <DialogContent data-testid="despesa-dialog">
+                <DialogHeader>
+                  <DialogTitle>{editingDespesaId ? 'Editar Despesa' : 'Nova Despesa'}</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleDespesaSubmit} className="space-y-4">
+                  <div>
+                    <Label>Descrição</Label>
+                    <Input
+                      value={despesaForm.descricao}
+                      onChange={(e) => setDespesaForm({ ...despesaForm, descricao: e.target.value })}
+                      required
+                      className="mt-1.5"
+                      data-testid="despesa-descricao-input"
+                    />
+                  </div>
+                  <div>
+                    <Label>Categoria</Label>
+                    <Input
+                      value={despesaForm.categoria}
+                      onChange={(e) => setDespesaForm({ ...despesaForm, categoria: e.target.value })}
+                      required
+                      className="mt-1.5"
+                      data-testid="despesa-categoria-input"
+                    />
+                  </div>
+                  <div>
+                    <Label>Valor</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={despesaForm.valor}
+                      onChange={(e) => setDespesaForm({ ...despesaForm, valor: e.target.value })}
+                      required
+                      className="mt-1.5"
+                      data-testid="despesa-valor-input"
+                    />
+                  </div>
+                  <div>
+                    <Label>Data</Label>
+                    <Input
+                      type="date"
+                      value={despesaForm.data}
+                      onChange={(e) => setDespesaForm({ ...despesaForm, data: e.target.value })}
+                      required
+                      className="mt-1.5"
+                      data-testid="despesa-data-input"
+                    />
+                  </div>
+                  <Button type="submit" className="w-full bg-[#0A192F] hover:bg-[#112240]" data-testid="despesa-submit-button">
+                    {editingDespesaId ? 'Atualizar' : 'Registrar'}
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </Card>
+          <Card className="shadow-sm">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Data</TableHead>
+                  <TableHead>Descrição</TableHead>
+                  <TableHead>Categoria</TableHead>
+                  <TableHead className="text-right">Valor</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {despesas.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center text-slate-500">Nenhuma despesa encontrada</TableCell>
+                  </TableRow>
+                ) : (
+                  despesas.map((desp) => (
+                    <TableRow key={desp.id}>
+                      <TableCell>{new Date(desp.data).toLocaleDateString('pt-BR')}</TableCell>
+                      <TableCell>{desp.descricao}</TableCell>
+                      <TableCell><Badge variant="secondary">{desp.categoria}</Badge></TableCell>
+                      <TableCell className="text-right font-bold text-red-600">R$ {desp.valor.toFixed(2)}</TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreVertical className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleEditDespesa(desp)}>
+                              <Pencil className="w-4 h-4 mr-2" />
+                              Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDeleteDespesa(desp.id)} className="text-red-600">
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Excluir
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </Card>
+        </TabsContent>
+
+        {/* Patrocinadores */}
+        <TabsContent value="patrocinadores">
+          <Card className="p-4 mb-4">
+            <Dialog open={patrOpen} onOpenChange={(val) => { setPatrOpen(val); if (!val) resetPatrForm(); }}>
+              <DialogTrigger asChild>
+                <Button className="bg-[#0A192F] hover:bg-[#112240] text-white" data-testid="add-patrocinador-button">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Novo Patrocinador
+                </Button>
+              </DialogTrigger>
+              <DialogContent data-testid="patrocinador-dialog">
+                <DialogHeader>
+                  <DialogTitle>{editingPatrId ? 'Editar Patrocinador' : 'Novo Patrocinador'}</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handlePatrSubmit} className="space-y-4">
+                  <div>
+                    <Label>Nome</Label>
+                    <Input
+                      value={patrForm.nome}
+                      onChange={(e) => setPatrForm({ ...patrForm, nome: e.target.value })}
+                      required
+                      className="mt-1.5"
+                      data-testid="patrocinador-nome-input"
+                    />
+                  </div>
+                  <div>
+                    <Label>Tipo</Label>
+                    <Input
+                      value={patrForm.tipo}
+                      onChange={(e) => setPatrForm({ ...patrForm, tipo: e.target.value })}
+                      required
+                      className="mt-1.5"
+                      data-testid="patrocinador-tipo-input"
+                    />
+                  </div>
+                  <div>
+                    <Label>Contato</Label>
+                    <Input
+                      value={patrForm.contato}
+                      onChange={(e) => setPatrForm({ ...patrForm, contato: e.target.value })}
+                      required
+                      className="mt-1.5"
+                      data-testid="patrocinador-contato-input"
+                    />
+                  </div>
+                  <div>
+                    <Label>Status</Label>
+                    <Select value={patrForm.ativo.toString()} onValueChange={(val) => setPatrForm({ ...patrForm, ativo: val === 'true' })}>
+                      <SelectTrigger className="mt-1.5" data-testid="patrocinador-ativo-select">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="true">Ativo</SelectItem>
+                        <SelectItem value="false">Inativo</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button type="submit" className="w-full bg-[#0A192F] hover:bg-[#112240]" data-testid="patrocinador-submit-button">
+                    {editingPatrId ? 'Atualizar' : 'Cadastrar'}
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </Card>
+          <Card className="shadow-sm">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nome</TableHead>
+                  <TableHead>Tipo</TableHead>
+                  <TableHead>Contato</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {patrocinadores.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center text-slate-500">Nenhum patrocinador encontrado</TableCell>
+                  </TableRow>
+                ) : (
+                  patrocinadores.map((patr) => (
+                    <TableRow key={patr.id}>
+                      <TableCell className="font-medium">{patr.nome}</TableCell>
+                      <TableCell>{patr.tipo}</TableCell>
+                      <TableCell>{patr.contato}</TableCell>
+                      <TableCell>
+                        <Badge variant={patr.ativo ? 'default' : 'secondary'} className={patr.ativo ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-800'}>
+                          {patr.ativo ? 'Ativo' : 'Inativo'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreVertical className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleEditPatr(patr)}>
+                              <Pencil className="w-4 h-4 mr-2" />
+                              Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDeletePatr(patr.id)} className="text-red-600">
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Excluir
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+};
+
+export default Financeiro;
