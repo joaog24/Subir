@@ -1,0 +1,41 @@
+# ============================================
+# E.C.P Manager - Sistema de Gerenciamento Esportivo
+# Esporte Clube Piedade
+# ============================================
+
+# Framework Web
+fastapi==0.110.1
+uvicorn==0.25.0
+starlette==0.37.2
+
+# Banco de Dados
+motor==3.3.1
+pymongo==4.5.0
+
+# Autenticação e Segurança
+python-jose==3.5.0
+PyJWT==2.12.1
+bcrypt==4.1.3
+passlib==1.7.4
+python-multipart==0.0.22
+
+# Validação de Dados
+pydantic==2.12.5
+pydantic_core==2.41.5
+email-validator==2.3.0
+
+# Variáveis de Ambiente
+python-dotenv==1.2.2
+
+# Exportação de Relatórios
+openpyxl==3.1.5
+reportlab==4.4.10
+
+# Utilitários
+python-dateutil==2.9.0.post0
+requests==2.32.5
+
+# Desenvolvimento (opcional)
+# black==26.3.1
+# flake8==7.3.0
+# pytest==9.0.2
