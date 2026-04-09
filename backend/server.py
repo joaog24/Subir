@@ -349,10 +349,32 @@ async def delete_atleta(atleta_id: str, current_user: dict = Depends(get_current
 
 @api_router.get("/treinos", response_model=List[TreinoResponse])
 async def list_treinos(current_user: dict = Depends(get_current_user)):
-    treinos = await db.treinos.find({}, {"_id": 0}).sort("data", -1).to_list(1000)
-    for treino in treinos:
-        presencas_count = await db.presencas.count_documents({"treino_id": treino['id'], "presente": True})
-        treino['total_presencas'] = presencas_count
+    # Use aggregation to avoid N+1 query
+    pipeline = [
+        {"$lookup": {
+            "from": "presencas",
+            "localField": "id",
+            "foreignField": "treino_id",
+            "as": "presencas"
+        }},
+        {"$addFields": {
+            "total_presencas": {
+                "$size": {
+                    "$filter": {
+                        "input": "$presencas",
+                        "cond": {"$eq": ["$$this.presente", True]}
+                    }
+                }
+            }
+        }},
+        {"$project": {
+            "_id": 0,
+            "presencas": 0
+        }},
+        {"$sort": {"data": -1}},
+        {"$limit": 1000}
+    ]
+    treinos = await db.treinos.aggregate(pipeline).to_list(1000)
     return [TreinoResponse(**t) for t in treinos]
 
 @api_router.post("/treinos", response_model=TreinoResponse)
@@ -650,25 +672,61 @@ async def get_dashboard_stats(mes: Optional[int] = None, ano: Optional[int] = No
         partida_query = {"data": {"$regex": f"{ano}-{str(mes).zfill(2)}"}}
     total_partidas = await db.partidas.count_documents(partida_query)
     
-    # Finanças
+    # Finanças - Use aggregation to sum directly in database
     receita_query = {}
     despesa_query = {}
     if mes and ano:
         receita_query = {"data": {"$regex": f"{ano}-{str(mes).zfill(2)}"}}
         despesa_query = {"data": {"$regex": f"{ano}-{str(mes).zfill(2)}"}}
     
-    recebimentos = await db.recebimentos.find(receita_query, {"_id": 0}).to_list(10000)
-    despesas = await db.despesas.find(despesa_query, {"_id": 0}).to_list(10000)
+    # Aggregate sum for receitas
+    receitas_pipeline = [
+        {"$match": receita_query},
+        {"$group": {"_id": None, "total": {"$sum": "$valor"}}}
+    ]
+    receitas_result = await db.recebimentos.aggregate(receitas_pipeline).to_list(1)
+    total_receitas = receitas_result[0]['total'] if receitas_result else 0
     
-    total_receitas = sum(r['valor'] for r in recebimentos)
-    total_despesas = sum(d['valor'] for d in despesas)
+    # Aggregate sum for despesas
+    despesas_pipeline = [
+        {"$match": despesa_query},
+        {"$group": {"_id": None, "total": {"$sum": "$valor"}}}
+    ]
+    despesas_result = await db.despesas.aggregate(despesas_pipeline).to_list(1)
+    total_despesas = despesas_result[0]['total'] if despesas_result else 0
+    
     saldo = total_receitas - total_despesas
     
-    # Resultados das partidas
-    partidas = await db.partidas.find(partida_query, {"_id": 0}).to_list(10000)
-    vitorias = sum(1 for p in partidas if p['gols_clube'] > p['gols_adversario'])
-    empates = sum(1 for p in partidas if p['gols_clube'] == p['gols_adversario'])
-    derrotas = sum(1 for p in partidas if p['gols_clube'] < p['gols_adversario'])
+    # Resultados das partidas - Calculate in database
+    resultados_pipeline = [
+        {"$match": partida_query},
+        {"$group": {
+            "_id": None,
+            "vitorias": {
+                "$sum": {
+                    "$cond": [{"$gt": ["$gols_clube", "$gols_adversario"]}, 1, 0]
+                }
+            },
+            "empates": {
+                "$sum": {
+                    "$cond": [{"$eq": ["$gols_clube", "$gols_adversario"]}, 1, 0]
+                }
+            },
+            "derrotas": {
+                "$sum": {
+                    "$cond": [{"$lt": ["$gols_clube", "$gols_adversario"]}, 1, 0]
+                }
+            }
+        }}
+    ]
+    resultados = await db.partidas.aggregate(resultados_pipeline).to_list(1)
+    
+    if resultados:
+        vitorias = resultados[0]['vitorias']
+        empates = resultados[0]['empates']
+        derrotas = resultados[0]['derrotas']
+    else:
+        vitorias = empates = derrotas = 0
     
     return DashboardStats(
         total_atletas_ativos=total_atletas,
@@ -684,31 +742,82 @@ async def get_dashboard_stats(mes: Optional[int] = None, ano: Optional[int] = No
 
 @api_router.get("/dashboard/charts")
 async def get_dashboard_charts(ano: int = 2024, current_user: dict = Depends(get_current_user)):
-    # Receitas vs Despesas por mês
+    # Receitas vs Despesas por mês - Use aggregation for efficiency
+    receitas_pipeline = [
+        {"$match": {"data": {"$regex": f"^{ano}"}}},
+        {"$group": {
+            "_id": {"$substr": ["$data", 5, 2]},
+            "total": {"$sum": "$valor"}
+        }},
+        {"$sort": {"_id": 1}}
+    ]
+    receitas_mensal = await db.recebimentos.aggregate(receitas_pipeline).to_list(12)
+    receitas_dict = {int(r['_id']): r['total'] for r in receitas_mensal}
+    
+    despesas_pipeline = [
+        {"$match": {"data": {"$regex": f"^{ano}"}}},
+        {"$group": {
+            "_id": {"$substr": ["$data", 5, 2]},
+            "total": {"$sum": "$valor"}
+        }},
+        {"$sort": {"_id": 1}}
+    ]
+    despesas_mensal = await db.despesas.aggregate(despesas_pipeline).to_list(12)
+    despesas_dict = {int(d['_id']): d['total'] for d in despesas_mensal}
+    
     financeiro_mensal = []
     for mes in range(1, 13):
-        query = {"data": {"$regex": f"{ano}-{str(mes).zfill(2)}"}}
-        recebimentos = await db.recebimentos.find(query, {"_id": 0}).to_list(10000)
-        despesas = await db.despesas.find(query, {"_id": 0}).to_list(10000)
-        
         financeiro_mensal.append({
             "mes": mes,
-            "receitas": sum(r['valor'] for r in recebimentos),
-            "despesas": sum(d['valor'] for d in despesas)
+            "receitas": receitas_dict.get(mes, 0),
+            "despesas": despesas_dict.get(mes, 0)
         })
     
-    # Treinos por mês
+    # Treinos por mês - Use aggregation
+    treinos_pipeline = [
+        {"$match": {"data": {"$regex": f"^{ano}"}}},
+        {"$group": {
+            "_id": {"$substr": ["$data", 5, 2]},
+            "total": {"$sum": 1}
+        }},
+        {"$sort": {"_id": 1}}
+    ]
+    treinos_result = await db.treinos.aggregate(treinos_pipeline).to_list(12)
+    treinos_dict = {int(t['_id']): t['total'] for t in treinos_result}
+    
     treinos_mensal = []
     for mes in range(1, 13):
-        query = {"data": {"$regex": f"{ano}-{str(mes).zfill(2)}"}}
-        count = await db.treinos.count_documents(query)
-        treinos_mensal.append({"mes": mes, "total": count})
+        treinos_mensal.append({"mes": mes, "total": treinos_dict.get(mes, 0)})
     
-    # Resultados das partidas
-    partidas = await db.partidas.find({}, {"_id": 0}).to_list(10000)
-    vitorias = sum(1 for p in partidas if p['gols_clube'] > p['gols_adversario'])
-    empates = sum(1 for p in partidas if p['gols_clube'] == p['gols_adversario'])
-    derrotas = sum(1 for p in partidas if p['gols_clube'] < p['gols_adversario'])
+    # Resultados das partidas - Calculate in database
+    resultados_pipeline = [
+        {"$group": {
+            "_id": None,
+            "vitorias": {
+                "$sum": {
+                    "$cond": [{"$gt": ["$gols_clube", "$gols_adversario"]}, 1, 0]
+                }
+            },
+            "empates": {
+                "$sum": {
+                    "$cond": [{"$eq": ["$gols_clube", "$gols_adversario"]}, 1, 0]
+                }
+            },
+            "derrotas": {
+                "$sum": {
+                    "$cond": [{"$lt": ["$gols_clube", "$gols_adversario"]}, 1, 0]
+                }
+            }
+        }}
+    ]
+    resultados = await db.partidas.aggregate(resultados_pipeline).to_list(1)
+    
+    if resultados:
+        vitorias = resultados[0]['vitorias']
+        empates = resultados[0]['empates']
+        derrotas = resultados[0]['derrotas']
+    else:
+        vitorias = empates = derrotas = 0
     
     return {
         "financeiro_mensal": financeiro_mensal,
@@ -737,10 +846,36 @@ async def export_excel(tipo: str, current_user: dict = Depends(get_current_user)
     elif tipo == "treinos":
         ws.title = "Treinos"
         ws.append(["Data", "Local", "Observações", "Presenças"])
-        treinos = await db.treinos.find({}, {"_id": 0}).to_list(1000)
+        # Use aggregation to avoid N+1 query
+        pipeline = [
+            {"$lookup": {
+                "from": "presencas",
+                "localField": "id",
+                "foreignField": "treino_id",
+                "as": "presencas"
+            }},
+            {"$addFields": {
+                "total_presencas": {
+                    "$size": {
+                        "$filter": {
+                            "input": "$presencas",
+                            "cond": {"$eq": ["$$this.presente", True]}
+                        }
+                    }
+                }
+            }},
+            {"$project": {
+                "_id": 0,
+                "data": 1,
+                "local": 1,
+                "observacoes": 1,
+                "total_presencas": 1
+            }},
+            {"$limit": 1000}
+        ]
+        treinos = await db.treinos.aggregate(pipeline).to_list(1000)
         for t in treinos:
-            presencas = await db.presencas.count_documents({"treino_id": t['id'], "presente": True})
-            ws.append([t['data'], t['local'], t.get('observacoes', ''), presencas])
+            ws.append([t['data'], t['local'], t.get('observacoes', ''), t['total_presencas']])
     
     elif tipo == "partidas":
         ws.title = "Partidas"
