@@ -7,14 +7,42 @@ import { Card } from '../components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Badge } from '../components/ui/badge';
 import { Plus, MoreVertical, Pencil, Trash2 } from 'lucide-react';
 import api from '../services/api';
+
+const meses = [
+  { value: 'null', label: 'Todos' },
+  { value: '1', label: 'Janeiro' }, { value: '2', label: 'Fevereiro' },
+  { value: '3', label: 'Março' }, { value: '4', label: 'Abril' },
+  { value: '5', label: 'Maio' }, { value: '6', label: 'Junho' },
+  { value: '7', label: 'Julho' }, { value: '8', label: 'Agosto' },
+  { value: '9', label: 'Setembro' }, { value: '10', label: 'Outubro' },
+  { value: '11', label: 'Novembro' }, { value: '12', label: 'Dezembro' },
+];
+
+const anos = [
+  { value: 'null', label: 'Todos' },
+  { value: '2024', label: '2024' },
+  { value: '2025', label: '2025' },
+  { value: '2026', label: '2026' },
+];
+
+const resultados = [
+  { value: 'null', label: 'Todos' },
+  { value: 'Vitória', label: 'Vitória' },
+  { value: 'Empate', label: 'Empate' },
+  { value: 'Derrota', label: 'Derrota' },
+];
 
 const Partidas = () => {
   const [partidas, setPartidas] = useState([]);
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [mes, setMes] = useState('null');
+  const [ano, setAno] = useState('null');
+  const [resultado, setResultado] = useState('null');
   const [formData, setFormData] = useState({
     data: '',
     adversario: '',
@@ -25,11 +53,16 @@ const Partidas = () => {
 
   useEffect(() => {
     loadPartidas();
-  }, []);
+  }, [mes, ano, resultado]);
 
   const loadPartidas = async () => {
     try {
-      const response = await api.get('/partidas');
+      const params = new URLSearchParams();
+      if (ano !== 'null') params.append('ano', ano);
+      if (mes !== 'null' && ano !== 'null') params.append('mes', mes);
+      if (resultado !== 'null') params.append('resultado', resultado);
+      const queryStr = params.toString() ? `?${params.toString()}` : '';
+      const response = await api.get(`/partidas${queryStr}`);
       setPartidas(response.data);
     } catch (error) {
       toast.error('Erro ao carregar partidas');
@@ -182,6 +215,34 @@ const Partidas = () => {
             </form>
           </DialogContent>
         </Dialog>
+      </div>
+
+      {/* Filtros */}
+      <div className="flex flex-wrap gap-3">
+        <Select value={ano} onValueChange={(val) => { setAno(val); if (val === 'null') setMes('null'); }}>
+          <SelectTrigger className="w-28" data-testid="partidas-year-filter">
+            <SelectValue placeholder="Ano" />
+          </SelectTrigger>
+          <SelectContent>
+            {anos.map(a => <SelectItem key={a.value} value={a.value}>{a.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Select value={mes} onValueChange={setMes} disabled={ano === 'null'}>
+          <SelectTrigger className="w-36" data-testid="partidas-month-filter">
+            <SelectValue placeholder="Mês" />
+          </SelectTrigger>
+          <SelectContent>
+            {meses.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Select value={resultado} onValueChange={setResultado}>
+          <SelectTrigger className="w-32" data-testid="partidas-result-filter">
+            <SelectValue placeholder="Resultado" />
+          </SelectTrigger>
+          <SelectContent>
+            {resultados.map(r => <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Table */}

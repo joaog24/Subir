@@ -464,10 +464,20 @@ def calcular_resultado(gols_clube: int, gols_adversario: int) -> str:
         return "Empate"
 
 @api_router.get("/partidas", response_model=List[PartidaResponse])
-async def list_partidas(current_user: dict = Depends(get_current_user)):
-    partidas = await db.partidas.find({}, {"_id": 0}).sort("data", -1).to_list(1000)
+async def list_partidas(mes: Optional[int] = None, ano: Optional[int] = None, resultado: Optional[str] = None, current_user: dict = Depends(get_current_user)):
+    query = {}
+    if mes and ano:
+        query["data"] = {"$regex": f"{ano}-{str(mes).zfill(2)}"}
+    elif ano:
+        query["data"] = {"$regex": f"^{ano}"}
+    
+    partidas = await db.partidas.find(query, {"_id": 0}).sort("data", -1).to_list(1000)
     for partida in partidas:
         partida['resultado'] = calcular_resultado(partida['gols_clube'], partida['gols_adversario'])
+    
+    if resultado:
+        partidas = [p for p in partidas if p['resultado'] == resultado]
+    
     return [PartidaResponse(**p) for p in partidas]
 
 @api_router.post("/partidas", response_model=PartidaResponse)
