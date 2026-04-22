@@ -6,27 +6,13 @@ Sistema completo de gestão esportiva para o clube amador Esporte Clube Piedade 
 ## Funcionalidades Implementadas
 - **Autenticação JWT** (login restrito à diretoria)
 - **Dashboard** com KPIs e gráficos (filtros mês/ano)
-- **Atletas** CRUD completo (com foto e pé dominante)
-- **Treinos** CRUD + controle de presenças
-- **Partidas** CRUD com cálculo automático de resultado
-- **Financeiro** CRUD de receitas, despesas e patrocinadores (com filtros mês/ano - igual Dashboard)
+- **Atletas** CRUD completo (com foto e pé dominante) - 23 atletas cadastrados
+- **Treinos** CRUD + controle de presenças - 59 treinos (2024-2026)
+- **Partidas** CRUD com cálculo automático de resultado - 30 partidas (2024-2026)
+- **Financeiro** CRUD de receitas, despesas e patrocinadores (com filtros mês/ano) - 51 receitas, 58 despesas, 8 patrocinadores
 - **Relatórios** exportação PDF/Excel
-- **Branding** personalizado E.C.P (cores, logo, fundo estádio)
-- **Diagramas** arquivos Mermaid .md em /app/docs/
-
-## Módulos e Status
-| Módulo | Status |
-|--------|--------|
-| Auth (JWT) | Completo |
-| Dashboard + filtros | Completo |
-| Atletas CRUD + foto + pé | Completo |
-| Treinos CRUD + presenças | Completo |
-| Partidas CRUD | Completo |
-| Financeiro CRUD + filtros mês/ano | Completo |
-| Relatórios PDF/Excel | Completo |
-| Branding E.C.P | Completo |
-| Diagramas .md | Completo |
-| Diagramas .png | Pendente (script criado, não executado) |
+- **Branding** personalizado E.C.P
+- **Dados realistas** populados via seed script (2024-2026)
 
 ## Credenciais
 - Email: diretoria@ecp.com.br / Senha: ecp2024
