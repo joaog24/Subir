@@ -23,6 +23,26 @@ const Financeiro = () => {
   const [editingReceitaId, setEditingReceitaId] = useState(null);
   const [editingDespesaId, setEditingDespesaId] = useState(null);
   const [editingPatrId, setEditingPatrId] = useState(null);
+  const [mes, setMes] = useState(null);
+  const [ano, setAno] = useState(new Date().getFullYear());
+
+  const meses = [
+    { value: null, label: 'Todos' },
+    { value: 1, label: 'Janeiro' },
+    { value: 2, label: 'Fevereiro' },
+    { value: 3, label: 'Março' },
+    { value: 4, label: 'Abril' },
+    { value: 5, label: 'Maio' },
+    { value: 6, label: 'Junho' },
+    { value: 7, label: 'Julho' },
+    { value: 8, label: 'Agosto' },
+    { value: 9, label: 'Setembro' },
+    { value: 10, label: 'Outubro' },
+    { value: 11, label: 'Novembro' },
+    { value: 12, label: 'Dezembro' },
+  ];
+
+  const anos = [2024, 2025, 2026];
 
   const [receitaForm, setReceitaForm] = useState({
     descricao: '',
@@ -47,13 +67,18 @@ const Financeiro = () => {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [mes, ano]);
 
   const loadData = async () => {
     try {
+      const params = new URLSearchParams();
+      if (mes) params.append('mes', mes);
+      if (ano) params.append('ano', ano);
+      const queryStr = params.toString() ? `?${params.toString()}` : '';
+
       const [recRes, despRes, patrRes] = await Promise.all([
-        api.get('/recebimentos'),
-        api.get('/despesas'),
+        api.get(`/recebimentos${queryStr}`),
+        api.get(`/despesas${queryStr}`),
         api.get('/patrocinadores'),
       ]);
       setRecebimentos(recRes.data);
@@ -218,9 +243,37 @@ const Financeiro = () => {
   return (
     <div className="space-y-6 fade-up" data-testid="financeiro-page">
       {/* Header */}
-      <div>
-        <h1 className="text-4xl font-bold text-slate-900 tracking-tight">Financeiro</h1>
-        <p className="text-slate-600 mt-1">Gerencie receitas, despesas e patrocinadores</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-4xl font-bold text-slate-900 tracking-tight">Financeiro</h1>
+          <p className="text-slate-600 mt-1">Gerencie receitas, despesas e patrocinadores</p>
+        </div>
+        <div className="flex gap-3">
+          <Select value={mes?.toString() || 'null'} onValueChange={(val) => setMes(val === 'null' ? null : parseInt(val))}>
+            <SelectTrigger className="w-40" data-testid="financeiro-month-filter">
+              <SelectValue placeholder="Mês" />
+            </SelectTrigger>
+            <SelectContent>
+              {meses.map((m) => (
+                <SelectItem key={m.value || 'null'} value={m.value?.toString() || 'null'}>
+                  {m.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={ano.toString()} onValueChange={(val) => setAno(parseInt(val))}>
+            <SelectTrigger className="w-32" data-testid="financeiro-year-filter">
+              <SelectValue placeholder="Ano" />
+            </SelectTrigger>
+            <SelectContent>
+              {anos.map((a) => (
+                <SelectItem key={a} value={a.toString()}>
+                  {a}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Summary Cards */}

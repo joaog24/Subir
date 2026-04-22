@@ -551,8 +551,13 @@ async def delete_patrocinador(patrocinador_id: str, current_user: dict = Depends
 # ==================== RECEITAS ROUTES ====================
 
 @api_router.get("/recebimentos", response_model=List[RecebimentoResponse])
-async def list_recebimentos(current_user: dict = Depends(get_current_user)):
-    recebimentos = await db.recebimentos.find({}, {"_id": 0}).sort("data", -1).to_list(1000)
+async def list_recebimentos(mes: Optional[int] = None, ano: Optional[int] = None, current_user: dict = Depends(get_current_user)):
+    query = {}
+    if mes and ano:
+        query["data"] = {"$regex": f"{ano}-{str(mes).zfill(2)}"}
+    elif ano:
+        query["data"] = {"$regex": f"^{ano}"}
+    recebimentos = await db.recebimentos.find(query, {"_id": 0}).sort("data", -1).to_list(1000)
     patrocinadores = await db.patrocinadores.find({}, {"_id": 0}).to_list(1000)
     
     for rec in recebimentos:
@@ -618,8 +623,13 @@ async def delete_recebimento(recebimento_id: str, current_user: dict = Depends(g
 # ==================== DESPESAS ROUTES ====================
 
 @api_router.get("/despesas", response_model=List[DespesaResponse])
-async def list_despesas(current_user: dict = Depends(get_current_user)):
-    despesas = await db.despesas.find({}, {"_id": 0}).sort("data", -1).to_list(1000)
+async def list_despesas(mes: Optional[int] = None, ano: Optional[int] = None, current_user: dict = Depends(get_current_user)):
+    query = {}
+    if mes and ano:
+        query["data"] = {"$regex": f"{ano}-{str(mes).zfill(2)}"}
+    elif ano:
+        query["data"] = {"$regex": f"^{ano}"}
+    despesas = await db.despesas.find(query, {"_id": 0}).sort("data", -1).to_list(1000)
     return [DespesaResponse(**d) for d in despesas]
 
 @api_router.post("/despesas", response_model=DespesaResponse)
