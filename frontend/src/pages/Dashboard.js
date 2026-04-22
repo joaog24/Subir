@@ -63,9 +63,9 @@ const Dashboard = () => {
     { label: 'Atletas Ativos', value: stats.total_atletas_ativos, icon: Users, color: 'bg-[#002B8C]' },
     { label: 'Treinos Realizados', value: stats.total_treinos, icon: Dumbbell, color: 'bg-[#28A745]' },
     { label: 'Partidas', value: stats.total_partidas, icon: Trophy, color: 'bg-[#0A1F51]' },
-    { label: 'Receitas', value: `R$ ${stats.total_receitas.toFixed(2)}`, icon: TrendingUp, color: 'bg-[#28A745]' },
-    { label: 'Despesas', value: `R$ ${stats.total_despesas.toFixed(2)}`, icon: TrendingDown, color: 'bg-[#DC3545]' },
-    { label: 'Saldo', value: `R$ ${stats.saldo.toFixed(2)}`, icon: DollarSign, color: stats.saldo >= 0 ? 'bg-[#28A745]' : 'bg-[#DC3545]' },
+    { label: 'Receitas', value: `R$ ${stats.total_receitas.toFixed(2)}`, icon: TrendingUp, color: 'bg-[#28A745]', valueColor: 'text-[#28A745]' },
+    { label: 'Despesas', value: `R$ ${stats.total_despesas.toFixed(2)}`, icon: TrendingDown, color: 'bg-[#DC3545]', valueColor: 'text-[#DC3545]' },
+    { label: 'Saldo', value: `R$ ${stats.saldo.toFixed(2)}`, icon: DollarSign, color: stats.saldo >= 0 ? 'bg-[#28A745]' : 'bg-[#DC3545]', valueColor: stats.saldo >= 0 ? 'text-[#28A745]' : 'text-[#DC3545]' },
   ];
 
   const mesesNomes = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
@@ -132,7 +132,7 @@ const Dashboard = () => {
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-sm font-medium text-slate-500 uppercase tracking-wide">{card.label}</p>
-                  <p className="text-3xl font-bold text-slate-900 mt-2">{card.value}</p>
+                  <p className={`text-3xl font-bold mt-2 ${card.valueColor || 'text-slate-900'}`}>{card.value}</p>
                 </div>
                 <div className={`${card.color} p-3 rounded-lg`}>
                   <Icon className="w-6 h-6 text-white" />
