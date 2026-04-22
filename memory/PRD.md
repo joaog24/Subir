@@ -8,7 +8,7 @@ Sistema completo de gestão esportiva para o clube amador Esporte Clube Piedade 
 - **Dashboard** com KPIs coloridos e gráficos (filtros mês/ano)
 - **Atletas** CRUD completo (com foto e pé dominante) - 23 atletas
 - **Treinos** CRUD + controle de presenças - 59 treinos (2024-2026)
-- **Partidas** CRUD com cálculo automático de resultado - 30 partidas (2024-2026)
+- **Partidas** CRUD com filtros por resultado (Vitória/Empate/Derrota), mês e ano - 30 partidas
 - **Financeiro** CRUD de receitas, despesas e patrocinadores (com filtros mês/ano)
 - **Relatórios** exportação PDF/Excel com filtros de período (mês/ano específico, ano ou todos)
 - **Branding** personalizado E.C.P
@@ -18,4 +18,4 @@ Sistema completo de gestão esportiva para o clube amador Esporte Clube Piedade 
 - Email: diretoria@ecp.com.br / Senha: ecp2024
 
 ## Backlog
-- P1: Gerar diagramas como imagens PNG (script em /app/docs/gerar_diagramas.py)
+- P2: Gerar diagramas como imagens PNG (script em /app/docs/gerar_diagramas.py)
