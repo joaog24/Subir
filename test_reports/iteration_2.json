@@ -1,0 +1,81 @@
+{
+  "summary": "Completed testing of Relatórios export feature with date filters. All backend API tests (21/21) and frontend UI tests passed successfully. The feature allows users to filter reports by year and month for Treinos, Partidas, and Financeiro. Atletas report has no date filter as expected.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_relatorios_export.py",
+    "/app/test_reports/pytest/pytest_relatorios.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [
+    "/app/backend/tests/test_relatorios_export.py"
+  ],
+  "success_rate": {
+    "backend": "100%",
+    "frontend": "100%"
+  },
+  "test_credentials": "Email: diretoria@ecp.com.br, Senha: ecp2024",
+  "seed_data_creation": "No seed data created - used existing data",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Relatórios export feature fully tested and working. Backend endpoints /api/export/excel/{tipo} and /api/export/pdf/{tipo} accept optional ?mes=X&ano=Y query params. Frontend Relatorios.js has ReportCard component with data-testid attributes: relatorio-{tipo}, relatorio-{tipo}-ano, relatorio-{tipo}-mes, export-excel-{tipo}, export-pdf-{tipo}. Month selector is disabled when year='Todos'. Atletas has no date filter (temFiltro: false).",
+  "test_results_detail": {
+    "backend_tests": {
+      "total": 21,
+      "passed": 21,
+      "failed": 0,
+      "tests": [
+        "TestAuth::test_login_success - PASSED",
+        "TestExcelExport::test_export_excel_atletas_no_filter - PASSED",
+        "TestExcelExport::test_export_excel_treinos_no_filter - PASSED",
+        "TestExcelExport::test_export_excel_treinos_year_filter - PASSED",
+        "TestExcelExport::test_export_excel_treinos_month_year_filter - PASSED",
+        "TestExcelExport::test_export_excel_partidas_no_filter - PASSED",
+        "TestExcelExport::test_export_excel_partidas_year_filter - PASSED",
+        "TestExcelExport::test_export_excel_partidas_month_year_filter - PASSED",
+        "TestExcelExport::test_export_excel_financeiro_no_filter - PASSED",
+        "TestExcelExport::test_export_excel_financeiro_year_filter - PASSED",
+        "TestExcelExport::test_export_excel_financeiro_month_year_filter - PASSED",
+        "TestPdfExport::test_export_pdf_atletas_no_filter - PASSED",
+        "TestPdfExport::test_export_pdf_treinos_no_filter - PASSED",
+        "TestPdfExport::test_export_pdf_treinos_year_filter - PASSED",
+        "TestPdfExport::test_export_pdf_partidas_no_filter - PASSED",
+        "TestPdfExport::test_export_pdf_partidas_month_year_filter - PASSED",
+        "TestPdfExport::test_export_pdf_financeiro_no_filter - PASSED",
+        "TestPdfExport::test_export_pdf_financeiro_year_filter - PASSED",
+        "TestPdfExport::test_export_pdf_financeiro_month_year_filter - PASSED",
+        "TestExportUnauthorized::test_export_excel_unauthorized - PASSED",
+        "TestExportUnauthorized::test_export_pdf_unauthorized - PASSED"
+      ]
+    },
+    "frontend_tests": {
+      "relatorios_page_loads": true,
+      "four_report_cards_present": true,
+      "atletas_no_date_filter": true,
+      "treinos_has_filters": true,
+      "partidas_has_filters": true,
+      "financeiro_has_filters": true,
+      "month_disabled_when_year_todos": true,
+      "month_enabled_when_year_selected": true,
+      "periodo_label_updates": true,
+      "export_buttons_work": true,
+      "test_scenarios": [
+        "4 report cards found: Atletas, Treinos, Partidas, Financeiro",
+        "Atletas card shows 'Cadastro completo' (no date filter)",
+        "Treinos/Partidas/Financeiro have Ano and Mês selectors",
+        "Month selector disabled when Year='Todos'",
+        "Month selector enabled after selecting Year 2024",
+        "Period label shows 'Junho/2024' after selecting June 2024",
+        "Export success toast: 'Relatório exportado com sucesso!'"
+      ]
+    }
+  }
+}

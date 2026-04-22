@@ -843,10 +843,29 @@ async def get_dashboard_charts(ano: int = 2024, current_user: dict = Depends(get
 
 # ==================== EXPORT ROUTES ====================
 
+def build_date_query(mes: Optional[int], ano: Optional[int]) -> dict:
+    """Constrói filtro de data para queries MongoDB."""
+    if mes and ano:
+        return {"data": {"$regex": f"{ano}-{str(mes).zfill(2)}"}}
+    elif ano:
+        return {"data": {"$regex": f"^{ano}"}}
+    return {}
+
+def build_periodo_label(mes: Optional[int], ano: Optional[int]) -> str:
+    """Gera label do período para nome de arquivo."""
+    meses_nomes = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"]
+    if mes and ano:
+        return f"_{meses_nomes[mes-1]}_{ano}"
+    elif ano:
+        return f"_{ano}"
+    return "_todos"
+
 @api_router.get("/export/excel/{tipo}")
-async def export_excel(tipo: str, current_user: dict = Depends(get_current_user)):
+async def export_excel(tipo: str, mes: Optional[int] = None, ano: Optional[int] = None, current_user: dict = Depends(get_current_user)):
     wb = openpyxl.Workbook()
     ws = wb.active
+    date_query = build_date_query(mes, ano)
+    periodo = build_periodo_label(mes, ano)
     
     if tipo == "atletas":
         ws.title = "Atletas"
@@ -858,8 +877,9 @@ async def export_excel(tipo: str, current_user: dict = Depends(get_current_user)
     elif tipo == "treinos":
         ws.title = "Treinos"
         ws.append(["Data", "Local", "Observações", "Presenças"])
-        # Use aggregation to avoid N+1 query
+        match_stage = {"$match": date_query} if date_query else {"$match": {}}
         pipeline = [
+            match_stage,
             {"$lookup": {
                 "from": "presencas",
                 "localField": "id",
@@ -883,6 +903,7 @@ async def export_excel(tipo: str, current_user: dict = Depends(get_current_user)
                 "observacoes": 1,
                 "total_presencas": 1
             }},
+            {"$sort": {"data": -1}},
             {"$limit": 1000}
         ]
         treinos = await db.treinos.aggregate(pipeline).to_list(1000)
@@ -892,7 +913,7 @@ async def export_excel(tipo: str, current_user: dict = Depends(get_current_user)
     elif tipo == "partidas":
         ws.title = "Partidas"
         ws.append(["Data", "Adversário", "Local", "Gols E.C.P", "Gols Adversário", "Resultado"])
-        partidas = await db.partidas.find({}, {"_id": 0}).to_list(1000)
+        partidas = await db.partidas.find(date_query, {"_id": 0}).sort("data", -1).to_list(1000)
         for p in partidas:
             resultado = calcular_resultado(p['gols_clube'], p['gols_adversario'])
             ws.append([p['data'], p['adversario'], p['local'], p['gols_clube'], p['gols_adversario'], resultado])
@@ -900,10 +921,10 @@ async def export_excel(tipo: str, current_user: dict = Depends(get_current_user)
     elif tipo == "financeiro":
         ws.title = "Financeiro"
         ws.append(["Tipo", "Data", "Descrição", "Valor"])
-        recebimentos = await db.recebimentos.find({}, {"_id": 0}).to_list(1000)
+        recebimentos = await db.recebimentos.find(date_query, {"_id": 0}).sort("data", -1).to_list(1000)
         for r in recebimentos:
             ws.append(["Receita", r['data'], r['descricao'], r['valor']])
-        despesas = await db.despesas.find({}, {"_id": 0}).to_list(1000)
+        despesas = await db.despesas.find(date_query, {"_id": 0}).sort("data", -1).to_list(1000)
         for d in despesas:
             ws.append(["Despesa", d['data'], d['descricao'], d['valor']])
     
@@ -914,17 +935,27 @@ async def export_excel(tipo: str, current_user: dict = Depends(get_current_user)
     return StreamingResponse(
         output,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": f"attachment; filename=ecp_{tipo}.xlsx"}
+        headers={"Content-Disposition": f"attachment; filename=ecp_{tipo}{periodo}.xlsx"}
     )
 
 @api_router.get("/export/pdf/{tipo}")
-async def export_pdf(tipo: str, current_user: dict = Depends(get_current_user)):
+async def export_pdf(tipo: str, mes: Optional[int] = None, ano: Optional[int] = None, current_user: dict = Depends(get_current_user)):
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4)
     elements = []
     styles = getSampleStyleSheet()
+    date_query = build_date_query(mes, ano)
+    periodo = build_periodo_label(mes, ano)
     
-    title = Paragraph(f"<b>E.C.P - Relatório de {tipo.capitalize()}</b>", styles['Title'])
+    meses_nomes = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"]
+    if mes and ano:
+        periodo_titulo = f" - {meses_nomes[mes-1]}/{ano}"
+    elif ano:
+        periodo_titulo = f" - {ano}"
+    else:
+        periodo_titulo = " - Todos"
+    
+    title = Paragraph(f"<b>E.C.P - Relatório de {tipo.capitalize()}{periodo_titulo}</b>", styles['Title'])
     elements.append(title)
     elements.append(Spacer(1, 0.3*inch))
     
@@ -934,8 +965,14 @@ async def export_pdf(tipo: str, current_user: dict = Depends(get_current_user)):
         for a in atletas:
             data.append([a['nome'], a['posicao'], a['telefone'], "Sim" if a['ativo'] else "Não"])
     
+    elif tipo == "treinos":
+        treinos = await db.treinos.find(date_query, {"_id": 0}).sort("data", -1).to_list(1000)
+        data = [["Data", "Local", "Observações"]]
+        for t in treinos:
+            data.append([t['data'], t['local'], t.get('observacoes', '')])
+    
     elif tipo == "partidas":
-        partidas = await db.partidas.find({}, {"_id": 0}).to_list(1000)
+        partidas = await db.partidas.find(date_query, {"_id": 0}).sort("data", -1).to_list(1000)
         data = [["Data", "Adversário", "Placar", "Resultado"]]
         for p in partidas:
             resultado = calcular_resultado(p['gols_clube'], p['gols_adversario'])
@@ -943,8 +980,8 @@ async def export_pdf(tipo: str, current_user: dict = Depends(get_current_user)):
             data.append([p['data'], p['adversario'], placar, resultado])
     
     elif tipo == "financeiro":
-        recebimentos = await db.recebimentos.find({}, {"_id": 0}).to_list(1000)
-        despesas = await db.despesas.find({}, {"_id": 0}).to_list(1000)
+        recebimentos = await db.recebimentos.find(date_query, {"_id": 0}).sort("data", -1).to_list(1000)
+        despesas = await db.despesas.find(date_query, {"_id": 0}).sort("data", -1).to_list(1000)
         data = [["Tipo", "Data", "Descrição", "Valor"]]
         for r in recebimentos:
             data.append(["Receita", r['data'], r['descricao'], f"R$ {r['valor']:.2f}"])
