@@ -41,20 +41,15 @@ api_router = APIRouter(prefix="/api")
 
 # ==================== CORS ====================
 
-cors_origins = os.environ.get("CORS_ORIGINS", "*")
-
-origins = ["*"] if cors_origins == "*" else [
-    origin.strip() for origin in cors_origins.split(",")
-]
+# ==================== CORS ====================
 
 app.add_middleware(
     CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=origins,
+    allow_credentials=False,
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 # ==================== ROOT ROUTE ====================
 
 @app.get("/")
