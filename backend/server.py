@@ -21,13 +21,6 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.styles import getSampleStyleSheet
 import certifi
 
-client = AsyncIOMotorClient(
-    mongo_url,
-    tls=True,
-    tlsCAFile=certifi.where(),
-    serverSelectionTimeoutMS=30000
-)
-
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / ".env")
 
