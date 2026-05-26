@@ -1,6 +1,6 @@
 from fastapi import FastAPI, APIRouter, HTTPException, Depends, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, JSONResponse, Response
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -52,41 +52,11 @@ ALLOWED_ORIGINS = [
     "http://localhost:5173",
 ]
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
-    allow_credentials=False,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allow_headers=["*"],
-)
 
-
-@app.middleware("http")
-async def force_cors_headers(request, call_next):
+def apply_cors_headers(response, origin: str | None = None):
     """
-    Garante que o backend sempre devolva os headers CORS necessários
-    para o frontend publicado na Vercel.
+    Aplica headers CORS em qualquer resposta, inclusive respostas de erro.
     """
-    origin = request.headers.get("origin")
-
-    if request.method == "OPTIONS":
-        from starlette.responses import Response
-
-        response = Response(status_code=200)
-
-        if origin in ALLOWED_ORIGINS:
-            response.headers["Access-Control-Allow-Origin"] = origin
-        else:
-            response.headers["Access-Control-Allow-Origin"] = "https://subir-uxiw.vercel.app"
-
-        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
-        response.headers["Access-Control-Allow-Headers"] = "*"
-        response.headers["Access-Control-Max-Age"] = "86400"
-
-        return response
-
-    response = await call_next(request)
-
     if origin in ALLOWED_ORIGINS:
         response.headers["Access-Control-Allow-Origin"] = origin
     else:
@@ -94,9 +64,44 @@ async def force_cors_headers(request, call_next):
 
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
     response.headers["Access-Control-Allow-Headers"] = "*"
+    response.headers["Access-Control-Max-Age"] = "86400"
 
     return response
 
+
+@app.middleware("http")
+async def force_cors_headers(request, call_next):
+    """
+    Middleware principal para garantir CORS até quando o backend gerar erro interno.
+    """
+    origin = request.headers.get("origin")
+
+    if request.method == "OPTIONS":
+        response = Response(status_code=200)
+        return apply_cors_headers(response, origin)
+
+    try:
+        response = await call_next(request)
+        return apply_cors_headers(response, origin)
+
+    except Exception as e:
+        response = JSONResponse(
+            status_code=500,
+            content={
+                "detail": "Erro interno no backend",
+                "error": str(e)
+            }
+        )
+        return apply_cors_headers(response, origin)
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ALLOWED_ORIGINS,
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # ==================== ROOT ROUTE ====================
 
