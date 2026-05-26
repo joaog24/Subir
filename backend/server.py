@@ -37,19 +37,67 @@ security = HTTPBearer()
 
 # Create the main app
 app = FastAPI(title="E.C.P Manager API")
+
+# Router principal da API
 api_router = APIRouter(prefix="/api")
 
-# ==================== CORS ====================
+# ==================== CORS - CORREÇÃO DEFINITIVA ====================
 
-# ==================== CORS ====================
+ALLOWED_ORIGINS = [
+    "https://subir-uxiw.vercel.app",
+    "https://subir-uxiw-git-main-joaogabriel24388-7337s-projects.vercel.app",
+    "https://subir-uxiw-joaogabriel24388-7337s-projects.vercel.app",
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "http://localhost:5173",
+]
 
 app.add_middleware(
     CORSMiddleware,
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=False,
-    allow_origins=["*"],
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def force_cors_headers(request, call_next):
+    """
+    Garante que o backend sempre devolva os headers CORS necessários
+    para o frontend publicado na Vercel.
+    """
+    origin = request.headers.get("origin")
+
+    if request.method == "OPTIONS":
+        from starlette.responses import Response
+
+        response = Response(status_code=200)
+
+        if origin in ALLOWED_ORIGINS:
+            response.headers["Access-Control-Allow-Origin"] = origin
+        else:
+            response.headers["Access-Control-Allow-Origin"] = "https://subir-uxiw.vercel.app"
+
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+        response.headers["Access-Control-Max-Age"] = "86400"
+
+        return response
+
+    response = await call_next(request)
+
+    if origin in ALLOWED_ORIGINS:
+        response.headers["Access-Control-Allow-Origin"] = origin
+    else:
+        response.headers["Access-Control-Allow-Origin"] = "https://subir-uxiw.vercel.app"
+
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+
+    return response
+
+
 # ==================== ROOT ROUTE ====================
 
 @app.get("/")
@@ -58,6 +106,15 @@ async def root():
         "message": "E.C.P Manager API online",
         "status": "ok"
     }
+
+
+@app.get("/health")
+async def health_check():
+    return {
+        "status": "ok",
+        "message": "Backend funcionando corretamente"
+    }
+
 
 # ==================== MODELS ====================
 
